@@ -95,7 +95,7 @@ The following eleven models were trained and compared:
 3.  Lasso Regression
 4.  ElasticNet Regression
 5.  Polynomial Regression
-6.  8.  Decision Tree Regressor
+6.  Decision Tree Regressor
 7.  Support Vector Regressor (SVR)
 8. AdaBoost Regressor
 9. Gradient Boosting Regressor
