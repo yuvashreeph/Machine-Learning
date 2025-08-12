@@ -123,7 +123,4 @@ The ensemble methods demonstrated clear superiority over simpler models. The **X
 
 -----
 
-## 👤 Author
 
-  - **Yuvashree P H**
-  - [GitHub Profile](https://www.google.com/search?q=https://github.com/yuvashreeph)
