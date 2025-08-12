@@ -94,14 +94,13 @@ The following eleven models were trained and compared:
 2.  Ridge Regression
 3.  Lasso Regression
 4.  ElasticNet Regression
-5.  Polynomial Regression (Degree 2)
-6.  K-Neighbors Regressor
+5.  Polynomial Regression
+6.  8.  Decision Tree Regressor
 7.  Support Vector Regressor (SVR)
-8.  Decision Tree Regressor
-9.  Random Forest Regressor
-10. AdaBoost Regressor
-11. Gradient Boosting Regressor
-12. **XGBoost Regressor**
+8. AdaBoost Regressor
+9. Gradient Boosting Regressor
+10. **XGBoost Regressor**
+11.  Random Forest Regressor
 
 ### 6. Results and Key Findings
 
