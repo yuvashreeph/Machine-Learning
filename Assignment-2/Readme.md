@@ -1,8 +1,7 @@
 # Comprehensive Analysis of Regression Models for Loan Amount Prediction
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A detailed data science project focused on predicting loan sanction amounts. This repository contains the code and analysis for a comparative study of eleven different regression algorithms, from simple linear models to advanced ensemble methods, to determine the most effective approach for this financial forecasting task.
+A detailed Machine Learning project focused on predicting loan sanction amounts. This repository contains the code and analysis for a comparative study of eleven different regression algorithms, from simple linear models to advanced ensemble methods, to determine the most effective approach for this financial forecasting task.
 
 ---
 
