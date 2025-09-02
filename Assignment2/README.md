@@ -1,6 +1,6 @@
 # Loan Sanction Amount Prediction using Multiple Regression Models
 
-This repository contains the code and report for a machine learning project focused on predicting the sanctioned loan amount based on customer and property data. The project compares the performance of eleven different regression algorithms to identify the most accurate model.
+This repository contains the code, report, and supplementary materials for a machine learning project focused on predicting sanctioned loan amounts using customer and property data. The project compares the performance of eleven different regression algorithms to identify the most accurate model.
 
 ## 📝 Table of Contents
 
@@ -19,7 +19,7 @@ This project aims to build, evaluate, and compare multiple regression models to 
 
 ## 📊 Dataset
 
-The dataset used for this project is `loan_sanction.csv`, containing various customer attributes.
+The dataset used for this project is `loan_sanction.csv` (not included in the repo, but referenced in the notebook), containing various customer attributes.
 
 **Key Features:**
 
@@ -39,12 +39,12 @@ The project follows a standard machine learning pipeline:
 1.  **Data Loading:** The dataset is loaded using pandas.
 2.  **Data Preprocessing:**
       - **Missing Value Imputation:** Null values are handled using mean/median for numerical columns and mode/default values for categorical ones.
-      - **Outlier Capping:** Outliers are managed by capping them at the 5th and 95th percentiles to limit the influence of extreme values.
+      - **Outlier Capping:** Outliers are managed by capping them at the 5th and 95th percentiles.
       - **Categorical Encoding:** Non-numeric features are converted into a machine-readable format using `LabelEncoder`.
-      - **Feature Standardization:** Numerical features are scaled using `StandardScaler` to have a mean of 0 and a standard deviation of 1.
+      - **Feature Standardization:** Numerical features are scaled using `StandardScaler`.
 3.  **Exploratory Data Analysis (EDA):** Visualizations like distribution plots, scatter plots, and a correlation heatmap are used to understand the data's characteristics.
 4.  **Train/Test Split:** The preprocessed data is split into training, validation, and test sets.
-5.  **Model Training & Hyperparameter Tuning:** Eleven different regression models are trained on the data. `GridSearchCV` is used for hyperparameter tuning to find the optimal configuration for each model.
+5.  **Model Training & Hyperparameter Tuning:** Eleven different regression models are trained on the data. `GridSearchCV` is used for hyperparameter tuning.
 6.  **Model Evaluation:** Models are evaluated based on MAE, MSE, RMSE, and R² Score.
 
 ## 🤖 Models Implemented
@@ -61,7 +61,7 @@ A total of eleven regression models were trained and compared:
 8.  AdaBoost Regressor
 9.  Gradient Boosting Regressor
 10. **XGBoost Regressor (Best Performing Model)**
-11. Support Vector Regressor (SVR) with Linear, Polynomial, RBF, and Sigmoid kernels.
+11. Support Vector Regressor (SVR) with multiple kernels.
 
 ## 🏆 Results
 
@@ -84,9 +84,10 @@ This demonstrates XGBoost's superior ability to model the complex, non-linear pa
 
 ## 📂 Files in this Repository
 
-  - `ml_LoanPrediction.ipynb`: The Jupyter Notebook containing all the Python code for data preprocessing, EDA, model training, and evaluation.
-  - `ml_LoanPrediction_Report.pdf`: A detailed PDF report summarizing the project's aim, methodology, results, and conclusion.
-  - `loan_sanction.csv`: The dataset used for the project (You should add this file to your repository).
+  - `ml_LoanPrediction.ipynb`: The primary Jupyter Notebook containing all Python code for the analysis, from data preprocessing to model evaluation.
+  - `ml_LoanPrediction_Report.pdf`: A detailed PDF report summarizing the project's aim, methodology, results, and conclusions.
+  - `exp_2_question.pdf`: The original assignment question sheet for the experiment.
+  - `Screenshots/`: A directory containing screenshots of code outputs and visualizations used in the report.
   - `README.md`: This file, providing a comprehensive overview of the project.
 
 ## 🚀 How to Run
@@ -113,7 +114,7 @@ To replicate this project on your local machine, follow these steps:
     pip install -r requirements.txt
     ```
 
-    *(You can create a `requirements.txt` file with the content from the section below).*
+    *(Create a `requirements.txt` file with the content from the section below).*
 
 4.  **Launch Jupyter Notebook:**
 
@@ -121,7 +122,7 @@ To replicate this project on your local machine, follow these steps:
     jupyter notebook
     ```
 
-5.  **Run the notebook:** Open the `ml_LoanPrediction.ipynb` file and execute the cells.
+5.  **Run the notebook:** Open the `ml_LoanPrediction.ipynb` file and execute the cells. You will need to provide the `loan_sanction.csv` dataset.
 
 ## 🛠️ Libraries Used
 
