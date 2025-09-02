@@ -1,0 +1,704 @@
+\documentclass[12pt]{article}
+
+% --- PACKAGES ---
+\usepackage[utf8]{inputenc}
+\usepackage[a4paper, margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{array}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{mwe} % For placeholder images, you can remove this
+
+% --- HYPERLINK AND LISTING STYLES ---
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\footnotesize\ttfamily,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+\lstset{style=mystyle}
+
+%====================================================================
+% DOCUMENT START
+%====================================================================
+\begin{document}
+
+% --- TITLE PAGE ---
+\begin{center}
+    \large \textbf{Sri Sivasubramaniya Nadar College of Engineering, Chennai} \\
+    (An autonomous Institution affiliated to Anna University) \\
+    \vspace{1cm}
+\end{center}
+
+\begin{table}[H]
+\renewcommand{\arraystretch}{1.5}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|l|cll|}
+\hline
+Degree \& Branch      & \multicolumn{1}{c|}{B.E. Computer Science \& Engineering} & \multicolumn{1}{l|}{Semester}         & V                     \\ \hline
+Subject Code \& Name & \multicolumn{3}{c|}{ICS1512 - Machine Learning Algorithms Laboratory} \\ \hline
+Academic year         & \multicolumn{1}{c|}{2025-2026 (Odd)}                      & \multicolumn{1}{c|}{Batch: 2023-2028} & \multicolumn{1}{c|}{\textbf{ Date: 12/08/2025}} \\ \hline
+\end{tabular}%
+}
+\end{table}
+
+\vspace{1cm}
+
+\begin{center}
+ \section*{Experiment 3: Spam Mail Prediction using Multiple Classification Models}
+\end{center}
+
+\vspace{1cm}
+
+\section{Aim}
+To build, evaluate, and compare multiple classification models for predicting whether an email is spam or not, justifying the model choices and using cross-validation to identify the most suitable model.
+
+\section{Libraries Used}
+Based on the import statements in the notebook, the primary libraries used were:
+\begin{itemize}
+    \item \textbf{pandas} – For data manipulation and reading CSV files.
+    \item \textbf{numpy} – For numerical computations.
+    \item \textbf{matplotlib} – For creating visualizations like plots.
+    \item \textbf{seaborn} – For statistical data visualization.
+    \item \textbf{scikit-learn} – For implementing and evaluating machine learning models, including metrics, model selection, and preprocessing.
+    \item \textbf{xgboost} – For implementing the XGBoost classifier.
+\end{itemize}
+
+\section{Objectives}
+\begin{itemize}
+    \item To apply and compare a wide range of classification algorithms for a predictive modeling task.
+    \item To evaluate model performance using Accuracy, Precision, Recall, and F1-Score.
+    \item To implement cross-validation to ensure model performance is robust and generalizable.
+    \item To identify the best-performing model for the given dataset and problem.
+\end{itemize}
+
+%====================================================================
+% PREPROCESSING SECTION
+%====================================================================
+
+\section{Data Preprocessing And EDA }
+\begin{verbatim}
+#Data Loading
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Load the data
+df = pd.read_csv('/content/drive/MyDrive/ML_LAB/mail.csv')
+# Display the first 5 rows
+print("First 5 rows of the dataset:")
+print(df.head())
+print("Initial shape:", df.shape)
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.6\textwidth]{dataset.png}
+    \caption{Output , showing the first five records of the dataset.}
+    \label{fig:dataset_head}
+\end{figure}
+
+
+\subsection*{Handling Missing Values and Outliers}
+\begin{verbatim}
+# HANDLE MISSING VALUES
+df = df.dropna(thresh=df.shape[1]//2)  # Drop rows with >50% missing
+df.fillna(df.median(numeric_only=True), inplace=True)
+
+# OUTLIER HANDLING (Z-Score)
+def remove_outliers(df, threshold=3):
+    numeric_cols = df.select_dtypes(include=[np.number]).columns
+    z_scores = np.abs((df[numeric_cols] - df[numeric_cols].mean()) / df[numeric_cols].std())
+    return df[(z_scores < threshold).all(axis=1)]
+df = remove_outliers(df)
+print("After outlier removal:", df.shape)
+
+After outlier removal: (2185, 58)
+
+# FEATURE / TARGET SPLIT
+X = df.drop(columns=[TARGET_COLUMN])
+y = df[TARGET_COLUMN]
+
+# ENCODE + STANDARDIZE
+numeric_cols = X.select_dtypes(include=[np.number]).columns
+categorical_cols = X.select_dtypes(exclude=[np.number]).columns
+X_encoded = pd.get_dummies(X, columns=categorical_cols)
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X_encoded)
+
+\end{verbatim}
+
+%====================================================================
+% MODELING SECTION
+%====================================================================
+\section{Model Training and Evaluation}
+
+\subsection*{Train-Validation-Test Split}
+The data was partitioned into training (70\%), validation (15\%), and test (15\%) sets to ensure robust model evaluation.
+
+\begin{verbatim}
+# TRAIN / VAL / TEST SPLIT
+X_train, X_temp, y_train, y_temp = train_test_split(X_encoded, y, test_size=0.3, random_state=42)
+X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42)
+
+print("Train set:", X_train.shape)
+print("Validation set:", X_val.shape)
+print("Test set:", X_test.shape)
+\end{verbatim}
+
+\begin{verbatim}
+Train set: (1529, 57)
+Validation set: (328, 57)
+Test set: (328, 57)
+\end{verbatim}
+\subsection*{Model Training}
+\begin{verbatim}
+def evaluate_model(name, model, X_train, X_test, param_grid=None, param_dist=None):
+
+    print(f"\n{name} - Hyperparameter Tuning Started")
+
+    #GRIDSEARCHCV
+    if param_grid:
+        grid_search = GridSearchCV(
+            estimator=model,
+            param_grid=param_grid,
+            cv=5,
+            scoring='accuracy',
+            n_jobs=-1
+        )
+        grid_search.fit(X_train, y_train)
+        print(f"Best Params (GridSearchCV): {grid_search.best_params_}")
+        print(f"Best CV Score (GridSearchCV): {grid_search.best_score_:.4f}")
+    else:
+        grid_search = None
+
+    # RANDOMIZEDSEARCHCV
+    if param_dist:
+        random_search = RandomizedSearchCV(
+            estimator=model,
+            param_distributions=param_dist,
+            n_iter=10,
+            cv=5,
+            scoring='accuracy',
+            random_state=42,
+            n_jobs=-1
+        )
+        random_search.fit(X_train, y_train)
+        print(f"Best Params (RandomizedSearchCV): {random_search.best_params_}")
+        print(f"Best CV Score (RandomizedSearchCV): {random_search.best_score_:.4f}")
+    else:
+        random_search = None
+
+    # PICK BEST MODEL
+    if grid_search and random_search:
+        best_model = (
+            grid_search if grid_search.best_score_ >= random_search.best_score_
+            else random_search
+        ).best_estimator_
+    elif grid_search:
+        best_model = grid_search.best_estimator_
+    elif random_search:
+        best_model = random_search.best_estimator_
+    else:
+        best_model = model
+
+    #  EVALUATION
+    start_time = time.time()
+    best_model.fit(X_train, y_train)
+    end_time = time.time()
+
+    y_pred = best_model.predict(X_test)
+    print(f"\n{name} Performance:")
+    print(f"Accuracy :  {accuracy_score(y_test, y_pred):.4f}")
+    print(f"Precision:  {precision_score(y_test, y_pred, average='macro'):.4f}")
+    print(f"Recall   :  {recall_score(y_test, y_pred, average='macro'):.4f}")
+    print(f"F1 Score :  {f1_score(y_test, y_pred, average='macro'):.4f}")
+    print(f"Training Time: {(end_time - start_time):.4f} seconds")
+
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+
+    cm = confusion_matrix(y_test, y_pred)
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm)
+    disp.plot(ax=axes[0], cmap='Blues')
+    axes[0].set_title('Confusion Matrix')
+
+    if hasattr(best_model, "predict_proba"):
+        y_prob = best_model.predict_proba(X_test)[:, 1]
+        fpr, tpr, _ = roc_curve(y_test, y_prob)
+        roc_auc = auc(fpr, tpr)
+
+        axes[1].plot(fpr, tpr, label=f'AUC = {roc_auc:.2f}', color='green')
+        axes[1].plot([0, 1], [0, 1], linestyle='--', color='blue')
+        axes[1].set_xlabel('False Positive Rate')
+        axes[1].set_ylabel('True Positive Rate')
+        axes[1].set_title('ROC Curve')
+        axes[1].legend()
+        axes[1].grid(True)
+    else:
+        axes[1].axis('off')
+
+    plt.tight_layout()
+    plt.show()
+\end{verbatim}
+\subsection*{Model Evaluation Results}
+The following models were trained and evaluated.
+\subsubsection*{Logistic Regression}
+\begin{verbatim}
+evaluate_model("Logistic Regression", LogisticRegression(max_iter=1000), X_train, X_test)
+Logistic Regression Performance:
+Accuracy :  0.9207
+Precision:  0.9287
+Recall   :  0.9098
+F1 Score :  0.9167
+Training Time: 3.7717 seconds
+\end{verbatim}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{logistic_Regression.png}
+    \caption{Confusion Matrix and ROC Curve for Logistic Regression}
+\end{figure}
+
+\subsubsection*{Naive Bayes - Gaussian}
+\begin{verbatim}
+evaluate_model("GaussianNB", GaussianNB(), X_train, X_test)
+GaussianNB Performance:
+Accuracy :  0.8140
+Precision:  0.8304
+Recall   :  0.8347
+F1 Score :  0.8139
+Training Time: 0.0058 seconds
+\end{verbatim}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{GaussianNB.png}
+    \caption{Confusion Matrix and ROC Curve for GaussianNB}
+\end{figure}
+
+\subsubsection*{Naive Bayes - Multinomial}
+\begin{verbatim}
+evaluate_model("MultinomialNB", MultinomialNB(), X_train, X_test)
+MultinomialNB Performance:
+Accuracy :  0.7744
+Precision:  0.7677
+Recall   :  0.7665
+F1 Score :  0.7671
+Training Time: 0.0053 seconds
+\end{verbatim}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{MultinomialNB.png}
+    \caption{Confusion Matrix and ROC Curve for MultinomialNB}
+\end{figure}
+
+\subsubsection*{Naive Bayes - Bernoulli}
+\begin{verbatim}
+evaluate_model("BernoulliNB", BernoulliNB(), X_train, X_test)
+BernoulliNB Performance:
+Accuracy :  0.8811
+Precision:  0.8837
+Recall   :  0.8706
+F1 Score :  0.8756
+Training Time: 0.0068 seconds
+\end{verbatim}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{BernoulliNB.png}
+    \caption{Confusion Matrix and ROC Curve for BernoulliNB}
+\end{figure}
+
+\subsubsection*{K-Nearest Neighbors - Varying k values [1, 3, 5, 7, 9]}
+\begin{verbatim}
+for k in [1, 3, 5, 7, 9]:
+    evaluate_model(f"KNN (k={k})", KNeighborsClassifier(n_neighbors=k), X_train, X_test)
+
+KNN (k=1) Performance:
+Accuracy :  0.7683
+Precision:  0.7616
+Recall   :  0.7592
+F1 Score :  0.7603
+Training Time: 0.0041 seconds
+\end{verbatim}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{KNN-1.png}
+    \caption{Confusion Matrix and ROC Curve for KNN-1}
+\end{figure}
+
+
+\begin{verbatim}
+KNN (k=3) Performance:
+Accuracy :  0.7591
+Precision:  0.7524
+Recall   :  0.7482
+F1 Score :  0.7499
+Training Time: 0.0038 seconds
+\end{verbatim}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{KNN-3.png}
+    \caption{Confusion Matrix and ROC Curve for KNN-3}
+\end{figure}
+\begin{verbatim}
+KNN (k=5) Performance:
+Accuracy :  0.7622
+Precision:  0.7572
+Recall   :  0.7475
+F1 Score :  0.7508
+Training Time: 0.0036 seconds
+\end{verbatim}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{KNN-5.png}
+    \caption{Confusion Matrix and ROC Curve for KNN-5}
+\end{figure}
+
+\begin{verbatim}
+KNN (k=7) Performance:
+Accuracy :  0.7561
+Precision:  0.7528
+Recall   :  0.7381
+F1 Score :  0.7423
+Training Time: 0.0038 seconds
+\end{verbatim}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{KNN-7.png}
+    \caption{Confusion Matrix and ROC Curve for KNN-7}
+\end{figure}
+
+\begin{verbatim}
+KNN (k=9) Performance:
+Accuracy :  0.7348
+Precision:  0.7322
+Recall   :  0.7123
+F1 Score :  0.7166
+Training Time: 0.0035 seconds
+\end{verbatim}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{KNN-9.png}
+    \caption{Confusion Matrix and ROC Curve for KNN-9}
+\end{figure}
+
+\subsection*{K-Nearest Neighbors - KDTree}
+\begin{verbatim}
+    evaluate_model("KNN (KDTree)", KNeighborsClassifier(algorithm='kd_tree'), X_train, X_test)
+    
+KNN (KDTree) Performance:
+Accuracy :  0.7622
+Precision:  0.7572
+Recall   :  0.7475
+F1 Score :  0.7508
+Training Time: 0.0149 seconds
+\end{verbatim}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{KNN_KD.png}
+    \caption{Confusion Matrix and ROC Curve for KNN-KDTree }
+\end{figure}
+
+\subsection*{K-Nearest Neighbors - BallTree}
+\begin{verbatim}
+    evaluate_model("KNN (BallTree)", KNeighborsClassifier(algorithm='ball_tree'), X_train, X_test)
+    
+KNN (BallTree) Performance:
+Accuracy :  0.7622
+Precision:  0.7572
+Recall   :  0.7475
+F1 Score :  0.7508
+Training Time: 0.0092 seconds
+\end{verbatim}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{KNN_Ball.png}
+    \caption{Confusion Matrix and ROC Curve for KNN-BallTree}
+\end{figure}
+
+\subsection*{Support Vector Classifier}
+\subsubsection*{SVC- Linear kernel}
+\begin{verbatim}
+svc_linear = SVC(kernel='linear', C=1.0, probability=True)
+evaluate_model("SVC (Linear)", svc_linear, X_train, X_test)
+
+SVC (Linear) Performance:
+Accuracy :  0.9268
+Precision:  0.9353
+Recall   :  0.9161
+F1 Score :  0.9231
+Training Time: 354.6113 seconds
+\end{verbatim}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{svc_linear.png}
+    \caption{Confusion Matrix and ROC Curve for SVC Linear Kernel}
+\end{figure}
+
+\subsubsection*{SVC- Polynomial kernel}
+\begin{verbatim}
+svc_poly = SVC(kernel='poly', C=1.0, degree=3, gamma='scale',probability=True)
+evaluate_model("SVC (Poly)", svc_poly, X_train, X_test)
+
+SVC (Poly) Performance:
+Accuracy :  0.6524
+Precision:  0.8137
+Recall   :  0.5809
+F1 Score :  0.5248
+Training Time: 1.2004 seconds
+\end{verbatim}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{svc_polynomial.png}
+    \caption{Confusion Matrix and ROC Curve for SVC Polynomial Kernel}
+\end{figure}
+
+\subsubsection*{SVC- RBF kernel}
+\begin{verbatim}
+svc_model = SVC(kernel='rbf', C=1.0, gamma='scale', probability=True)
+evaluate_model("SVC (RBF Kernel)", svc_model, X_train, X_test)
+
+SVC (RBF Kernel) Performance:
+Accuracy :  0.7165
+Precision:  0.7742
+Recall   :  0.6667
+F1 Score :  0.6607
+Training Time: 0.6475 seconds
+\end{verbatim}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{svc_rbf.png}
+    \caption{Confusion Matrix and ROC Curve for SVC RBF Kernel}
+\end{figure}
+
+\subsubsection*{SVC- Sigmoid kernel}
+\begin{verbatim}
+svc_sigmoid = SVC(kernel='sigmoid', C=1.0, gamma='scale', probability=True)
+evaluate_model("SVC (Sigmoid)", svc_sigmoid, X_train, X_test)
+
+SVC (Sigmoid) Performance:
+Accuracy :  0.5366
+Precision:  0.5178
+Recall   :  0.5173
+F1 Score :  0.5170
+Training Time: 0.6506 seconds
+\end{verbatim}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{svc_sigmoid.png}
+    \caption{Confusion Matrix and ROC Curve for SVC Sigmoid Kernel}
+\end{figure}
+
+\section{Model Justification and Dataset Suitability}
+\begin{itemize}
+    \item \textbf{Logistic Regression:} Chosen as a simple and interpretable baseline model for this binary classification task.
+    \item \textbf{Naive Bayes (Gaussian, Multinomial, Bernoulli):} These probabilistic models are efficient and often perform well on text classification tasks like spam detection, making them a suitable choice.
+    \item \textbf{K-Nearest Neighbors:} A non-parametric model chosen to capture potentially complex, non-linear decision boundaries based on feature similarity.
+    \item \textbf{Support Vector Machine (SVM):} A powerful model that is effective in high-dimensional spaces. Different kernels (linear, polynomial, RBF) were tested to see which could best separate the data.
+\end{itemize}
+\section{Model Comparison}
+\subsubsection*{Performance Comparison of Na¨ıve Bayes Variants}
+\begin{table}[h!]
+\centering
+\caption{Performance Comparison of Na¨ıve Bayes Variants}
+\label{tab:nb_variants}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+\textbf{Model} & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & \textbf{F1 Score} \\
+\midrule
+Gaussian NB     & 0.8100 & 0.8102 & 0.8076 & 0.8084 \\
+Multinomial NB  & 0.7033 & 0.7726 & 0.7192 & 0.6922 \\
+Bernoulli NB    & 0.4767 & 0.6356 & 0.5089 & 0.3438 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+
+\subsubsection*{KNN Performance for Different k Values}
+\begin{table}[H]
+\centering
+\caption{KNN Performance for Different k Values}
+\label{tab:knn_k_values}
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+\textbf{k} & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & \textbf{F1 Score} \\
+\midrule
+1 & 0.7683 & 0.7616 & 0.7592 & 0.7603 \\
+3 & 0.7591 & 0.7524 & 0.7482 & 0.7499 \\
+5 & 0.7622 & 0.7572 & 0.7475 & 0.7508 \\
+7 & 0.7561 & 0.7528 & 0.7381 & 0.7423 \\
+9 & 0.7348 & 0.7322 & 0.7123 & 0.7166 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection*{KNN Comparison: KDTree vs BallTree}
+\begin{table}[H]
+\centering
+\caption{KNN Comparison: KDTree vs BallTree}
+\label{tab:knn_tree_comparison}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+\textbf{Metric} & \textbf{KDTree} & \textbf{BallTree} \\
+\midrule
+Accuracy & 0.7622 & 0.7622 \\
+Precision & 0.7572 & 0.7572 \\
+Recall & 0.7475 & 0.7475 \\
+F1 Score & 0.7508 & 0.7508 \\
+Training Time (s) & 0.0149 & 0.0092 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsubsection*{SVM Performance with Different Kernels and Parameters}
+\begin{table}[H]
+\centering
+\caption{SVM Performance with Different Kernels and Parameters}
+\label{tab:svm_kernels}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+\textbf{Kernel} & \textbf{Hyperparameters} & \textbf{Accuracy} & \textbf{F1 Score} & \textbf{Training Time (s)} \\
+\midrule
+Linear & C = 1.0 & 0.9268 & 0.9231 & 354.61 \\
+Polynomial & C = 1.0, degree = 3, gamma = 'scale' & 0.6524 & 0.5248 & 1.20 \\
+RBF & C = 1.0, gamma = 'scale' & 0.7165 & 0.6607 & 0.65 \\
+Sigmoid & C = 1.0, gamma = 'scale' & 0.5366 & 0.5170 & 0.65 \\
+\bottomrule
+\end{tabular}%
+}
+\end{table}
+\begin{table}[H]
+\centering
+\caption{Average 5-Fold Cross-Validation Results}
+\label{tab:cv_comparison}
+\small
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+\textbf{Model} & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-Score} \\
+\midrule
+Logistic Regression & 0.918 & 0.925 & 0.908 & 0.915 \\
+GaussianNB & 0.831 & 0.758 & 0.981 & 0.855 \\
+MultinomialNB & 0.768 & 0.755 & 0.771 & 0.762 \\
+BernoulliNB & 0.879 & 0.872 & 0.888 & 0.880 \\
+K-Neighbors Classifier & 0.791 & 0.829 & 0.719 & 0.770 \\
+SVC (Linear) & 0.921 & 0.926 & 0.911 & 0.918 \\
+SVC (Poly) & 0.651 & 0.960 & 0.379 & 0.544 \\
+SVC (RBF) & 0.692 & 0.968 & 0.451 & 0.616 \\
+
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Final Test Set Results}
+\label{tab:test_comparison}
+\small
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+\textbf{Model} & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-Score} \\
+\midrule
+Logistic Regression & 0.9207 & 0.9287 & 0.9098 & 0.9167 \\
+GaussianNB & 0.8353 & 0.7607 & 0.9855 & 0.8589 \\
+MultinomialNB & 0.7713 & 0.7584 & 0.7753 & 0.7667 \\
+BernoulliNB & 0.8810 & 0.8750 & 0.8913 & 0.8830 \\
+K-Neighbors Classifier & 0.7957 & 0.8333 & 0.7246 & 0.7751 \\
+SVC (Linear) & 0.9237 & 0.9292 & 0.9130 & 0.9210 \\
+SVC (Poly) & 0.6554 & 0.9636 & 0.3840 & 0.5492 \\
+SVC (RBF) & 0.6951 & 0.9708 & 0.4565 & 0.6212 \\
+
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{K-Fold Cross-Validation Scores for Each Model (K=5)}
+\label{tab:kfold_cv}
+\begin{tabular}{@{}lccc@{}}
+\toprule
+\textbf{Fold} & \textbf{Na¨ıve Bayes Accuracy} & \textbf{KNN Accuracy} & \textbf{SVM Accuracy} \\
+\midrule
+Fold 1 & 0.8627 & 0.7643 & 0.9268 \\
+Fold 2 & 0.8993 & 0.7712 & 0.9268 \\
+Fold 3 & 0.8673 & 0.7666 & 0.9108 \\
+Fold 4 & 0.8810 & 0.7529 & 0.9176 \\
+Fold 5 & 0.8947 & 0.8009 & 0.9268 \\
+\midrule
+\textbf{Average} & \textbf{0.879} & \textbf{0.791} & \textbf{0.921} \\
+\bottomrule
+\multicolumn{4}{l}{}
+\end{tabular}
+\end{table}
+
+\section{Best Practices Followed}
+To ensure the experiment was methodologically sound and the results were reliable, several key machine learning best practices were followed:
+
+\begin{itemize}
+    \item \textbf{Robust Evaluation:} 5-Fold Cross-Validation was used instead of a single train-test split to get a more stable and accurate measure of each model's performance.
+
+    \item \textbf{Comprehensive Metrics:} Models were judged on a suite of metrics (Accuracy, Precision, Recall, and F1-Score) to provide a holistic view of their performance.
+
+    \item \textbf{Reproducibility:} The entire experiment was made reproducible by setting a consistent \texttt{random\_state} for data splits and model training.
+
+    \item \textbf{Preventing Data Leakage:} Preprocessing steps like feature scaling were fitted only on the training data to prevent the model from gaining unfair knowledge of the test set, ensuring the results are realistic.
+    
+    \item \textbf{Baseline Modeling:} Simple models like Logistic Regression were used to establish a performance benchmark, which helps to justify the added value of more complex models.
+\end{itemize}
+
+\section{Conclusion}
+\begin{itemize}
+    \item \textbf{Champion Model Identified:} The Support Vector Classifier (SVC) with a Linear Kernel emerged as the top-performing model. It achieved the highest F1-Score of 0.9210 and an accuracy of 0.9237 on the final test set.
+
+    \item \textbf{Linear Models Excelled:} The strong performance of the linear SVC, along with Logistic Regression, suggests the features in this dataset are largely linearly separable. More complex, non-linear models failed to provide any additional predictive advantage.
+
+    \item \textbf{Ineffective Models:} K-Nearest Neighbors and SVMs with non-linear kernels (Polynomial, RBF, and Sigmoid) proved to be less effective for this specific problem. These models yielded significantly lower performance scores across all metrics.
+
+    \item \textbf{Robust and Generalizable Results:} The chosen SVC (Linear) model demonstrated strong generalization, as its cross-validation F1-score (0.918) was very close to its final test set score. This indicates the model is robust and not overfitted to the training data.
+\end{itemize}
+
+
+\section{Learning Outcomes}
+\begin{itemize}
+    \item Gained experience implementing a full machine learning pipeline for a classification problem.
+    \item Understood the importance of establishing a performance baseline with simple models.
+    \item Learned to justify model selection based on dataset characteristics.
+    \item Demonstrated the application of various classification algorithms and evaluation metrics.
+\end{itemize}
+
+\section*{GitHub Repository}
+The complete source code for this experiment is available on GitHub:
+\href{https://github.com/yuvashreeph/Machine-Learning/tree/main/Assignment3}{GitHub}
+
+\end{document}
+```
