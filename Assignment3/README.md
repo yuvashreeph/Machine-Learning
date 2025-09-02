@@ -2,93 +2,76 @@
 
 ## 📖 Project Overview
 
-This project focuses on building and evaluating a suite of machine learning models to classify emails as "spam" or "not spam". The primary goal is to compare various classification algorithms, from simple baselines to powerful ensemble methods, and identify the most effective model for this task. The project follows a structured machine learning workflow, including data preprocessing, exploratory data analysis, model training, hyperparameter tuning, and robust evaluation using K-fold cross-validation.
+This project provides a comprehensive analysis of various classification algorithms for the task of spam email detection. The core of the project is a Jupyter Notebook (`ml_Mail.ipynb`) that implements a full machine learning pipeline, from data preprocessing to model evaluation. A detailed report (`ml_Mail_Report.pdf`) accompanies the code, documenting the experiment's aim, methodology, results, and conclusions.
+
+The primary goal is to compare the performance of several models—including Naïve Bayes variants, K-Nearest Neighbors, and Support Vector Machines—to identify the most effective and robust classifier for this dataset.
 
 -----
 
 ## 📊 Dataset
 
-The experiment uses the "Spam Mail" dataset, which contains pre-extracted features from emails. The dataset consists of 57 features, primarily related to word and character frequencies, and a target variable indicating whether the email is spam.
+The experiment utilizes a dataset containing pre-extracted features from emails, making it suitable for a feature-based classification task.
 
-  - **File:** `mail.csv`
-  - **Initial Shape:** (4601, 58)
-  - **Shape after Preprocessing:** (2185, 58)
+  - **Source File:** `mail.csv` (not included in the repository, assumed to be available)
+  - **Features:** The dataset consists of 57 numerical features, likely related to word frequencies, character frequencies, and other email metadata.
+  - **Target Variable:** A binary variable indicating whether an email is spam (1) or not spam (0).
+  - **Preprocessing:** The raw data is cleaned by handling missing values, removing outliers using the Z-score method, and scaling features with `StandardScaler` to ensure optimal model performance.
 
 -----
 
 ## 🤖 Models Implemented
 
-A comprehensive set of 13 classification models were trained and evaluated to provide a thorough comparison:
+A diverse set of classification models were trained and evaluated to provide a thorough comparison:
 
-1.  **Logistic Regression** (Baseline)
-2.  **Naive Bayes**
-      - GaussianNB
-      - MultinomialNB
-      - BernoulliNB
+1.  **Logistic Regression** (as a baseline)
+2.  **Naïve Bayes Variants**
+      - Gaussian Naïve Bayes
+      - Multinomial Naïve Bayes
+      - Bernoulli Naïve Bayes
 3.  **K-Nearest Neighbors (KNN)**
-      - Tested with k-values: [1, 3, 5, 7, 9]
-      - Algorithms: KDTree, BallTree
+      - Evaluated with multiple `k` values (1, 3, 5, 7, 9).
+      - Compared `KDTree` and `BallTree` algorithms.
 4.  **Support Vector Machine (SVM)**
       - Linear Kernel
       - Polynomial Kernel
       - RBF Kernel
       - Sigmoid Kernel
-5.  **Tree-Based Ensemble Models**
-      - Decision Tree Classifier
-      - Random Forest Classifier
-      - AdaBoost Classifier
-      - Gradient Boosting Classifier
-      - **XGBoost Classifier**
 
 -----
 
 ## ⚙️ Methodology
 
-The project follows a standard machine learning pipeline:
+The project follows a structured and robust machine learning workflow:
 
-1.  **Data Preprocessing & EDA:**
-
-      - Loaded the dataset using `pandas`.
-      - Handled missing values by dropping rows with more than 50% missing data and filling the rest with the median.
-      - Removed outliers using the Z-score method (threshold=3).
-      - Standardized numerical features using `StandardScaler`.
-
-2.  **Data Splitting:**
-
-      - The dataset was split into training (70%), validation (15%), and test (15%) sets to ensure robust and unbiased evaluation.
-
-3.  **Model Training & Hyperparameter Tuning:**
-
-      - Each model was trained on the training data.
-      - `GridSearchCV` and `RandomizedSearchCV` were used to find the optimal hyperparameters for key models like Decision Tree and Random Forest.
-
+1.  **Data Preprocessing:** The dataset is loaded, cleaned by handling missing values and outliers, and features are standardized.
+2.  **Data Splitting:** The data is partitioned into training (70%), validation (15%), and test (15%) sets to ensure an unbiased evaluation.
+3.  **Model Training:** Each model is trained on the preprocessed training data.
 4.  **Evaluation:**
-
-      - Models were evaluated using a comprehensive set of metrics: **Accuracy, Precision, Recall, and F1-Score**.
-      - **5-Fold Cross-Validation** was performed on the training set to get a stable measure of performance.
-      - Final performance was reported on the held-out test set.
-      - Visualizations like **Confusion Matrices** and **ROC Curves** were generated for each model to analyze its performance in detail.
+      - Performance is measured using **Accuracy, Precision, Recall, and F1-Score**.
+      - **5-Fold Cross-Validation** is used on the training data to assess the stability and generalization of each model.
+      - The final performance is reported on the held-out test set.
+      - Visualizations, including **Confusion Matrices** and **ROC Curves**, are generated for each model to provide a deeper insight into its performance.
 
 -----
 
 ## 📈 Results
 
-The ensemble methods demonstrated clear superiority over simpler models. The **XGBoost Classifier** emerged as the top-performing model across all evaluation metrics.
+After a comprehensive evaluation, a clear performance hierarchy emerged among the tested models.
 
 ### Key Findings:
 
-  - **Best Model:** **XGBoost Classifier**
-  - **Test Set F1-Score:** **0.9499**
-  - **Test Set Accuracy:** **0.9481**
-  - The performance of XGBoost on the 5-fold cross-validation (Avg. F1-Score: 0.947) was very close to its performance on the final test set, indicating that the model is robust and generalizes well to unseen data.
+  - **Champion Model:** The **Support Vector Classifier (SVC) with a Linear Kernel** was the best-performing model.
+  - **Top Performance Metrics (Test Set):**
+      - **Accuracy:** **0.9237**
+      - **F1-Score:** **0.9210**
+  - **Conclusion:** The superior performance of the linear SVC and Logistic Regression suggests that the features of this dataset are largely linearly separable. Non-linear models like KNN and SVMs with non-linear kernels were less effective. The consistency between the cross-validation and test set results confirms the robustness of the SVC (Linear) model.
 
-| Model | Test Accuracy | Test F1-Score |
-| :--- | :--- | :--- |
-| **XGBoost Classifier** | **0.9481** | **0.9499** |
-| Random Forest | 0.9451 | 0.9458 |
-| Gradient Boosting | 0.9420 | 0.9424 |
-| SVC (Linear) | 0.9237 | 0.9210 |
-| Logistic Regression | 0.9207 | 0.9167 |
+| Model | Test Accuracy | Test F1-Score | CV Accuracy (Avg) |
+| :--- | :--- | :--- | :--- |
+| **SVC (Linear)** | **0.9237** | **0.9210** | **0.921** |
+| Logistic Regression | 0.9207 | 0.9167 | 0.918 |
+| Bernoulli NB | 0.8810 | 0.8830 | 0.879 |
+| KNN (k=5) | 0.7622 | 0.7508 | 0.791 |
 
 -----
 
@@ -97,18 +80,26 @@ The ensemble methods demonstrated clear superiority over simpler models. The **X
 1.  **Clone the repository:**
 
     ```bash
-    git clone https://github.com/yuvashreeph/Machine-Learning.git
-    cd Machine-Learning/Assignment3
+    git clone <repository-url>
+    cd <repository-folder>
     ```
 
-2.  **Install the required libraries:**
+2.  **Install dependencies:**
+    Ensure you have Python installed, then install the required libraries.
 
     ```bash
-    pip install pandas numpy matplotlib seaborn scikit-learn xgboost
+    pip install pandas numpy matplotlib seaborn scikit-learn jupyter
     ```
 
-3.  **Run the Jupyter Notebook:**
-    Open and run the `ml_Mail.ipynb` notebook in a Jupyter environment. Ensure the `mail.csv` dataset is in the correct path as specified in the notebook.
+3.  **Launch Jupyter Notebook:**
+    Open the `ml_Mail.ipynb` file in a Jupyter environment to view, run, and interact with the code.
+
+    ```bash
+    jupyter notebook ml_Mail.ipynb
+    ```
+
+4.  **View the Report:**
+    The detailed analysis and findings are documented in the `ml_Mail_Report.pdf` file.
 
 -----
 
@@ -119,8 +110,3 @@ The ensemble methods demonstrated clear superiority over simpler models. The **X
   - `matplotlib`
   - `seaborn`
   - `scikit-learn`
-  - `xgboost`
-
------
-
-
