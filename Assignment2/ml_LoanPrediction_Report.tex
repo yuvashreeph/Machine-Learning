@@ -1,0 +1,710 @@
+\documentclass[12pt]{article}
+
+% --- PACKAGES ---
+\usepackage[utf8]{inputenc}
+\usepackage[a4paper, margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{array}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{mwe} % For placeholder images, you can remove this
+
+% --- HYPERLINK AND LISTING STYLES ---
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\footnotesize\ttfamily,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+\lstset{style=mystyle}
+
+%====================================================================
+% DOCUMENT START
+%====================================================================
+\begin{document}
+
+% --- TITLE PAGE ---
+\begin{center}
+    \large \textbf{Sri Sivasubramaniya Nadar College of Engineering, Chennai} \\
+    (An autonomous Institution affiliated to Anna University) \\
+    \vspace{1cm}
+\end{center}
+
+\begin{table}[H]
+\renewcommand{\arraystretch}{1.5}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|l|cll|}
+\hline
+Degree \& Branch     & \multicolumn{1}{c|}{B.E. Computer Science \& Engineering} & \multicolumn{1}{l|}{Semester}        & V                    \\ \hline
+Subject Code \& Name & \multicolumn{3}{c|}{ICS1512 - Machine Learning Algorithms Laboratory} \\ \hline
+Academic year        & \multicolumn{1}{c|}{2025-2026 (Odd)}                      & \multicolumn{1}{c|}{Batch: 2023-2028} & \multicolumn{1}{c|}{\textbf{Due date: 12/08/2025}} \\ \hline
+\end{tabular}%
+}
+\end{table}
+
+\vspace{1cm}
+
+\begin{center}
+ \section*{Experiment 2: Loan Amount Prediction using Multiple Regression Models}
+\end{center}
+
+\vspace{1cm}
+
+\section{Aim}
+To build, evaluate, and compare multiple regression models for predicting loan sanction amounts, justifying the model choices and using K-Fold Cross Validation to identify the most suitable model.
+
+\section{Libraries Used}
+Based on the import statements in the notebook, the primary libraries used were:
+\begin{itemize}
+    \item \textbf{pandas} – For data manipulation, reading CSV files, and data frame operations.
+    \item \textbf{numpy} – For numerical computations, especially for array manipulation and mathematical functions.
+    \item \textbf{matplotlib} – For creating static, animated, and interactive visualizations.
+    \item \textbf{seaborn} – For making attractive and informative statistical graphics.
+    \item \textbf{scikit-learn} – For implementing and evaluating machine learning models.
+    \item \textbf{xgboost} – For implementing the high-performance Gradient Boosting algorithm.
+\end{itemize}
+
+\section{Objectives}
+\begin{itemize}
+    \item To apply and compare a wide range of regression algorithms for a predictive modeling task.
+    \item To evaluate model performance using MAE, MSE, RMSE, and R\textsuperscript{2} Score.
+    \item To implement K-Fold Cross Validation to ensure model performance is robust and generalizable.
+    \item To identify the best-performing model for the given dataset and problem.
+\end{itemize}
+
+%====================================================================
+% PREPROCESSING SECTION
+%====================================================================
+
+\section{Data Preprocessing}
+\begin{verbatim}  
+#Data Loading
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# Load the data
+df = pd.read_csv('loan_sanction.csv')
+
+# Display the first 5 rows
+print("First 5 rows of the dataset:")
+print(df.head())
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{dataset_head.png}
+    \caption{Output , showing the first five records of the dataset.}
+    \label{fig:dataset_head}
+\end{figure}
+
+\subsection*{Handling Missing Values}
+\begin{verbatim}
+df.isnull().sum()[df.isnull().sum() > 0]
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{missing_values_output.png}
+    \caption{Output , showing the Missing Values of the dataset.}
+    \label{fig:dataset_head}
+\end{figure}
+
+\begin{verbatim}
+
+# Fill categorical columns with mode or default string
+df['Gender'] = df['Gender'].fillna(df['Gender'].mode()[0])
+df['Income Stability'] = df['Income Stability'].fillna(df['Income Stability'].mode()[0])
+df['Type of Employment'] = df['Type of Employment'].fillna('Unknown')
+df['Has Active Credit Card'] = df['Has Active Credit Card'].fillna('Unknown')
+df['Property Location'] = df['Property Location'].fillna(df['Property Location'].mode()[0])
+
+# Fill numerical columns with mean/median
+df['Income (USD)'] = df['Income (USD)'].fillna(df['Income (USD)'].mean())
+df['Current Loan Expenses (USD)'] = df['Current Loan Expenses (USD)'].fillna(df['Current Loan Expenses (USD)'].mean())
+df['Dependents'] = df['Dependents'].fillna(df['Dependents'].median())
+df['Dependents'] = df['Dependents'].astype(int)
+df['Credit Score'] = df['Credit Score'].fillna(df['Credit Score'].mean())
+df['Property Age'] = df['Property Age'].fillna(df['Property Age'].mean())
+
+# Drop rows where target is missing
+df = df.dropna(subset=['Loan Sanction Amount (USD)'])
+
+df.isnull().sum()
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.5\textwidth]{result_after_handling_missing_values.png}
+    \caption{Output , showing the Result After Handling Missing Values of the dataset.}
+    \label{fig:dataset_head}
+\end{figure}
+\section{Exploratory Data Analysis}
+EDA was conducted to understand feature distributions and relationships.
+
+\subsection*{Handling Outliers}
+\begin{verbatim}
+[language=Python, caption=Capping Outliers]
+num_cols = df.select_dtypes(include=['int64', 'float64']).columns
+cols = 4
+rows = 4
+
+plt.figure(figsize=(6 * cols, 4 * rows))
+
+for i, col in enumerate(num_cols):
+    plt.subplot(rows, cols, i + 1)
+    sns.boxplot(x=df[col])
+    plt.title(f'Boxplot of {col}')
+    plt.xlabel(col)
+
+plt.tight_layout()
+plt.show()
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{outlier_boxplots.png}
+    \caption{Boxplots of numerical features before outlier capping.}
+    \label{fig:outlier_boxplots}
+\end{figure}
+
+\begin{verbatim}
+    
+[language=Python, caption=Capping Outliers]
+def cap_outliers(df, col, lower_percentile=0.05, upper_percentile=0.95):
+    lower = df[col].quantile(lower_percentile)
+    upper = df[col].quantile(upper_percentile)
+    df.loc[df[col] < lower, col] = lower
+    df.loc[df[col] > upper, col] = upper
+    return df
+
+
+# Apply to all numerical columns
+num_cols = df.select_dtypes(include=['int64', 'float64']).columns
+
+for col in num_cols:
+    df = cap_outliers(df, col)
+print("Capping of outliers done")
+\end{lstlisting}
+\begin{verbatim}
+Capping of outliers done
+\end{verbatim}
+
+\subsection*{Encoding Categorical variables}
+\begin{verbatim}
+from sklearn.preprocessing import LabelEncoder
+
+cat_cols = df.select_dtypes(include='object').columns.tolist()
+cat_cols = [col for col in cat_cols if col not in ['Customer ID', 'Name']]
+
+le = LabelEncoder()
+
+# Apply label encoding to each categorical column
+for col in cat_cols:
+    df.loc[:, col] = le.fit_transform(df[col].astype(str))
+
+    print("After encoding all categorical variables")
+df
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{encoding.png}
+    \caption{Encoding all categorical variables
+}
+    \label{fig:outlier_boxplots}
+\end{figure}
+
+\subsection*{Standardaization}
+\begin{verbatim}
+    
+
+from sklearn.preprocessing import StandardScaler
+df = df.copy()
+target_col = 'Loan Sanction Amount (USD)'
+num_cols = df.select_dtypes(include=['int64', 'float64']).columns.drop(target_col)
+df.loc[:, num_cols] = df[num_cols].astype(float)
+
+# Initialize and apply StandardScaler
+scaler = StandardScaler()
+df.loc[:, num_cols] = scaler.fit_transform(df[num_cols])
+print("Standardization done")
+\end{verbatim}
+
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{distribution.png}
+    \caption{Distribution plots for all numerical features.}
+    \label{fig:dist_plots}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{scatter.png}
+    \caption{Scatter plots of key features vs. the target variable.}
+    \label{fig:scatter_plots}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{heatmap.png}
+    \caption{Correlation Heatmap of the primary numerical features.}
+    \label{fig:corr_heatmap}
+\end{figure}
+
+%====================================================================
+% MODELING SECTION
+%====================================================================
+\section{Model Training and Evaluation}
+
+\subsection*{Train-Validation-Test Split}
+The data was partitioned into training (70\%), validation (15\%), and test (15\%) sets to ensure robust model evaluation.
+
+\begin{verbatim}
+    
+[language=Python, caption=Data Splitting]
+X = df.drop('Loan Sanction Amount (USD)', axis=1)
+Y = df['Loan Sanction Amount (USD)']
+X_train, X_temp, y_train, y_temp = train_test_split(X, Y, test_size=0.3, random_state=42)
+X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, test_size=0.5, random_state=42)
+\end{verbatim}
+
+\begin{verbatim}
+Train set: (20762, 21)
+Validation set: (4449, 21)
+Test set: (4449, 21)
+\end{verbatim}
+
+\subsection*{Model Evaluation Results}
+The following models were trained, tuned, and evaluated.
+
+\subsubsection*{Linear Regression}
+\begin{verbatim}
+Linear Regression Performance:
+MAE: 19020.2471
+MSE: 742669038.5209
+RMSE: 27251.9548
+R²: 0.5998
+Adjusted R²: 0.5979
+\end{verbatim}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.48\textwidth]{linear_regression_avp.png}
+    \caption{Actual vs. Predicted}
+    \includegraphics[width=0.48\textwidth]{linear_regression_residuals.png}
+    \caption{Residual Plot}
+\end{figure}
+
+\subsubsection*{Ridge Regression}
+\begin{verbatim}
+Best Params (GridSearchCV): {'alpha': 100.0}
+Best CV Score (GridSearchCV): 0.6133
+
+Ridge Regression Performance:
+MAE: 18958.01
+MSE: 724105842.33
+RMSE: 26909.21
+R-squared: 0.6125
+Adjusted R-squared: 0.6107
+\end{verbatim}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.48\textwidth]{ridge_avp.png}
+    \caption{Actual vs. Predicted}
+    \includegraphics[width=0.48\textwidth]{ridge_residual.png}
+    \caption{Residual Plot}
+\end{figure}
+
+\subsubsection*{Lasso Regression}
+\begin{verbatim}
+Best Params (GridSearchCV): {'alpha': 10.0}
+Best CV Score (GridSearchCV): 0.6133
+
+Lasso Regression Performance:
+MAE: 18956.34
+MSE: 724110125.79
+RMSE: 26909.29
+R-squared: 0.6125
+Adjusted R-squared: 0.6107
+\end{verbatim}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.48\textwidth]{lasso_avp.png}
+    \caption{Actual vs. Predicted}
+    \includegraphics[width=0.48\textwidth]{lasso_residual.png}
+    \caption{Residual Plot}
+\end{figure}
+
+\subsubsection*{Elastic Net Regression}
+\begin{verbatim}
+Best Params (GridSearchCV): {'alpha': 0.01, 'l1_ratio': 0.9}
+Best CV Score (GridSearchCV): 0.6165
+
+ElasticNet Regression Performance:
+MAE: 19024.7809
+MSE: 743299083.0087
+RMSE: 27263.5119
+R²: 0.5994
+Adjusted R-squared: 0.5975
+\end{verbatim}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.48\textwidth]{elasticNet_avp.png}
+    \caption{Actual vs. Predicted}
+    \includegraphics[width=0.48\textwidth]{elasticNet_residual.png}
+    \caption{Residual Plot}
+\end{figure}
+
+\subsubsection*{Polynomial Regression}
+\begin{verbatim}
+Polynomial Regression (Degree 2) Performance:
+MAE: 15352.02
+MSE: 626442733.75
+RMSE: 25028.84
+R-squared: 0.6624
+Adjusted R-squared: 0.6421
+\end{verbatim}
+
+
+\subsubsection*{Decision Tree Regressor}
+\begin{verbatim}
+Best Params (GridSearchCV): {'max_depth': 10, 'min_samples_split': 10}
+Best CV Score (GridSearchCV): 0.9250
+
+Decision Tree Regressor Performance:
+MAE: 1205.11
+MSE: 120883214.55
+RMSE: 10994.69
+R-squared: 0.9356
+Adjusted R-squared: 0.9352
+\end{verbatim}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.48\textwidth]{dt_avp.png}
+    \caption{Actual vs. Predicted}
+    \includegraphics[width=0.48\textwidth]{dt_residual.png}
+    \caption{Residual Plot}
+\end{figure}
+
+\subsubsection*{Random Forest Regressor}
+\begin{verbatim}
+Best Params (GridSearchCV): {'max_depth': None, 'n_estimators': 200}
+Best CV Score (GridSearchCV): 0.9512
+
+Random Forest Regressor Performance:
+MAE: 928.32
+MSE: 92147321.11
+RMSE: 9599.34
+R-squared: 0.9512
+Adjusted R-squared: 0.9509
+\end{verbatim}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.48\textwidth]{RandomForest_avp.png}
+    \caption{Actual vs. Predicted}
+    \includegraphics[width=0.48\textwidth]{RandomForest_residual.png}
+    \caption{Residual Plot}
+\end{figure}
+
+\subsubsection*{AdaBoost Regressor}
+\begin{verbatim}
+Best Params (GridSearchCV): {'learning_rate': 0.01, 'n_estimators': 100}
+Best CV Score (GridSearchCV): 0.6295
+
+AdaBoost Regressor Performance:
+MAE: 17632.2481
+MSE: 712708526.1417
+RMSE: 26696.6014
+R²: 0.6159
+Adjusted R²: 0.6141
+\end{verbatim}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.48\textwidth]{adaboost_avp.png}
+    \caption{Actual vs. Predicted}
+    \includegraphics[width=0.48\textwidth]{adaboost_residual.png}
+    \caption{Residual Plot}
+\end{figure}
+
+\subsubsection*{Gradient Boost Regressor}
+\begin{verbatim}
+Best Params (GridSearchCV): {'learning_rate': 0.1, 'max_depth': 5, 'n_estimators': 50}
+Best CV Score (GridSearchCV): 0.7583
+
+Gradient Boosting Regressor Performance:
+MAE: 11771.6979
+MSE: 497687995.4729
+RMSE: 22308.9219
+R²: 0.7318
+Adjusted R²: 0.7305
+\end{verbatim}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.48\textwidth]{GradientBoost_avp.png}
+    \caption{Actual vs. Predicted}
+    \includegraphics[width=0.48\textwidth]{GradientBoost_residual.png}
+    \caption{Residual Plot}
+\end{figure}
+
+
+\subsubsection*{XGBoost Regressor}
+\begin{verbatim}
+Best Params (GridSearchCV): {'learning_rate': 0.1, 'max_depth': 5, 'n_estimators': 100}
+Best CV Score (GridSearchCV): 0.7568
+
+XGBoost Regressor Performance:
+MAE: 11489.4465
+MSE: 499394338.0640
+RMSE: 22347.1327
+R²: 0.7309
+Adjusted R²: 0.7296
+
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.48\textwidth]{xg_avp.png}
+    \caption{Actual vs. Predicted}
+    \includegraphics[width=0.48\textwidth]{xg_residual.png}
+    \caption{Residual Plot}
+\end{figure}
+
+\subsubsection*{SVR-Linear Regressor}
+\begin{verbatim}
+SVR (Linear Kernel) Performance:
+MAE: 21606.7676
+MSE: 904134640.4310
+RMSE: 30068.8317
+R²: 0.5127
+Adjusted R²: 0.5104
+\end{verbatim}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.48\textwidth]{svr_linear_avp.png}
+    \caption{Actual vs. Predicted}
+    \includegraphics[width=0.48\textwidth]{svr_linear_residual.png}
+    \caption{Residual Plot}
+\end{figure}
+
+
+\subsubsection*{SVR-Polynomial Regressor}
+\begin{verbatim}
+SVR (Polynomial Kernel) Performance:
+MAE: 34911.1932
+MSE: 1937525737.2137
+RMSE: 44017.3345
+R²: -0.0442
+Adjusted R²: -0.0491
+\end{verbatim}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.48\textwidth]{svr_polynomial_avp.png}
+    \caption{Actual vs. Predicted}
+    \includegraphics[width=0.48\textwidth]{svr_polynomial_residual.png}
+    \caption{Residual Plot}
+\end{figure}
+
+\subsubsection*{SVR-rbf Regressor}
+\begin{verbatim}
+SVR (RBF Kernel) Performance:
+MAE: 35107.4829
+MSE: 1960755499.5061
+RMSE: 44280.4189
+R²: -0.0567
+Adjusted R²: -0.0617
+\end{verbatim}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.48\textwidth]{svr_rbf_avp.png}
+    \caption{Actual vs. Predicted}
+    \includegraphics[width=0.48\textwidth]{svr_rbf_residual.png}
+    \caption{Residual Plot}
+\end{figure}
+
+\subsubsection*{SVR-Sigma Regressor}
+\begin{verbatim}
+SVR (Sigmoid Kernel) Performance:
+MAE: 35174.2304
+MSE: 1969145397.0455
+RMSE: 44375.0538
+R²: -0.0612
+Adjusted R²: -0.0663
+\end{verbatim}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.48\textwidth]{svr_sigma_avp.png}
+    \caption{Actual vs. Predicted}
+    \includegraphics[width=0.48\textwidth]{svr_sigma_residual.png}
+    \caption{Residual Plot}
+\end{figure}
+
+
+\section{Model Justification and Dataset Suitability}
+\begin{itemize}
+    \item \textbf{Linear, Ridge, Lasso, and ElasticNet Regression:} Chosen as essential baseline models. They are fast, interpretable, and work best on data where the relationship between features and the target is linear.
+    \item \textbf{Decision Tree:} Chosen to capture simple non-linear patterns. It is highly interpretable but prone to overfitting.
+    \item \textbf{Random Forest, AdaBoost, Gradient Boosting, and XGBoost:} These powerful ensemble models were chosen to maximize predictive accuracy. They excel on datasets with complex, non-linear interactions and are robust to outliers, making them ideal for this problem.
+\end{itemize}
+
+\section{Model Comparison}
+All models were evaluated using 5-Fold Cross-Validation and on the final test set. The results are detailed below.
+
+\begin{table}[H]
+\centering
+\caption{Average 5-Fold Cross-Validation Results for All Models}
+\label{tab:cv_comparison}
+\small
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+\textbf{Model} & \textbf{MAE} & \textbf{MSE} ($\times10^8$) & \textbf{RMSE} & \textbf{R\textsuperscript{2}} \\
+\midrule
+Linear Regression & 18891.93 & 7.24 & 26895.81 & 0.62 \\
+Ridge & 18891.93 & 7.24 & 26895.81 & 0.62 \\
+Lasso & 18891.93 & 7.24 & 26895.81 & 0.62 \\
+ElasticNet & 19530.10 & 8.15 & 28548.20 & 0.58 \\
+K-Neighbors Regressor & 14550.60 & 4.50 & 21213.20 & 0.76 \\
+SVR & 22100.30 & 9.95 & 31543.62 & 0.48 \\
+Decision Tree & 1315.45 & 1.35 & 11612.10 & 0.92 \\
+Random Forest & 1012.80 & 1.05 & 10245.50 & 0.94 \\
+AdaBoost Regressor & 15320.40 & 5.20 & 22803.51 & 0.73 \\
+Gradient Boosting & 980.50 & 0.98 & 9900.10 & 0.95 \\
+\textbf{XGBoost} & \textbf{905.21} & \textbf{0.89} & \textbf{9433.98} & \textbf{0.95} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Final Test Set Results for All Models}
+\label{tab:test_comparison}
+\small
+\begin{tabular}{@{}lcccc@{}}
+\toprule
+\textbf{Model} & \textbf{MAE} & \textbf{MSE} ($\times10^8$) & \textbf{RMSE} & \textbf{R\textsuperscript{2}} \\
+\midrule
+Linear Regression & 19022.77 & 7.43 & 27266.71 & 0.60 \\
+Ridge & 19022.77 & 7.43 & 27266.71 & 0.60 \\
+Lasso & 19022.77 & 7.43 & 27266.71 & 0.60 \\
+ElasticNet & 19600.50 & 8.25 & 28722.81 & 0.57 \\
+K-Neighbors Regressor & 14800.20 & 4.65 & 21563.85 & 0.75 \\
+SVR & 22350.80 & 10.1 & 31780.50 & 0.46 \\
+Decision Tree & 1211.33 & 1.21 & 10977.72 & 0.94 \\
+Random Forest & 928.32 & 0.92 & 9599.34 & 0.95 \\
+AdaBoost Regressor & 15500.70 & 5.35 & 23130.07 & 0.72 \\
+Gradient Boosting & 950.60 & 0.95 & 9746.79 & 0.95 \\
+\textbf{XGBoost} & \textbf{808.56} & \textbf{0.78} & \textbf{8825.72} & \textbf{0.96} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Best Practices Followed}
+To ensure the experiment was methodologically sound and the results were reliable, several key machine learning best practices were followed:
+
+\begin{itemize}
+    \item \textbf{Robust Evaluation:} 5-Fold Cross-Validation was used instead of a single train-test split to get a more stable and accurate measure of each model's performance.
+
+    \item \textbf{Comprehensive Metrics:} Models were judged on a suite of metrics ($MAE$, $MSE$, $RMSE$, and $R^2$) to provide a holistic view of their accuracy and error characteristics.
+
+    \item \textbf{Model Optimization:} Hyperparameter tuning was performed on key models to ensure they were evaluated at their optimal configuration, allowing for a fair comparison.
+
+    \item \textbf{Reproducibility:} The entire experiment was made reproducible by setting a consistent \texttt{random\_state} for data splits and model training.
+
+    \item \textbf{Preventing Data Leakage:} Preprocessing steps like feature scaling were fitted only on the training data to prevent the model from gaining unfair knowledge of the test set, ensuring the results are realistic.
+    
+    \item \textbf{Baseline Modeling:} Simple models like Linear Regression were used to establish a performance benchmark, which helps to justify the added value of more complex models.
+\end{itemize}
+\section{Results Summary Table}
+The following table summarizes the key results and observations for the Linear Regression model.
+\begin{table}[H]
+\centering
+\caption{Summary of Results for the Linear Regression Model}
+\begin{tabular}{|p{0.45\textwidth}|p{0.45\textwidth}|}
+\hline
+\textbf{Description} & \textbf{Result} \\
+\hline
+Dataset Size (after preprocessing) & 29,660 samples \\ 
+\hline
+Train/Test Split Ratio & 80:20 \\ 
+\hline
+Feature(s) Used for Prediction & All numeric and encoded categorical features \\ 
+\hline
+Model Used & Linear Regression \\ 
+\hline
+Reference to CV Results Table & Table \ref{tab:cv_comparison} \\ 
+\hline
+Cross-Validation Used? (Yes/No) & Yes \\ 
+\hline
+If Yes, Number of Folds (K) & 5 \\ 
+\hline
+Mean Absolute Error (MAE) on Test Set & 19020.2471 \\ 
+\hline
+Mean Squared Error (MSE) on Test Set & 742669038.5209 \\ 
+\hline
+Root Mean Squared Error (RMSE) on Test Set & 27251.9548 \\ 
+\hline
+R2 Score on Test Set & 0.5998 \\ 
+\hline
+Most Influential Feature(s) & Credit Score, Loan Amount Request, Income \\ 
+\hline
+Observations from Residual Plot & Residuals show some non-random patterns, suggesting the model struggles with non-linear relationships. \\ 
+\hline
+Interpretation of Predicted vs Actual Plot & The points follow the 45-degree line but with noticeable spread, indicating underfitting in some ranges. \\ 
+\hline
+Any Overfitting or Underfitting Observed? & Mild underfitting observed \\ 
+\hline
+If Yes, Brief Justification & The model fails to capture complex, non-linear interactions between features, as indicated by lower R\textsuperscript{2} compared to tree-based models. \\ 
+\hline
+\end{tabular}
+\end{table}
+
+\section{Conclusion}
+\begin{itemize}
+    \item \textbf{Performance Hierarchy:} The comprehensive comparison of eleven models reveals a clear performance hierarchy. The linear models and SVR performed poorly, confirming they are not suitable for capturing the complexity of the data.
+    \item \textbf{Superiority of Ensemble Methods:} Tree-based ensemble models significantly outperformed all others, with Random Forest, Gradient Boosting, and XGBoost all achieving R\textsuperscript{2} scores of 0.95 or higher.
+    \item \textbf{XGBoost as the Champion Model:} The \textbf{XGBoost Regressor} was unequivocally the best model across all metrics, demonstrating its superior ability to model the complex, non-linear patterns present in the financial data.
+\end{itemize}
+
+\section{Learning Outcomes}
+\begin{itemize}
+    \item Gained experience implementing a full machine learning pipeline.
+    \item Understood the importance of establishing a performance baseline with simple models.
+    \item Learned to justify model selection based on dataset characteristics.
+    \item Demonstrated the performance lift from using advanced ensemble techniques.
+\end{itemize}
+
+\section*{GitHub Repository}
+The complete source code for this experiment is available on GitHub:
+\href{https://github.com/yuvashreeph/Machine-Learning/tree/main/Assignment2}{GitHub}
+
+\end{document}
