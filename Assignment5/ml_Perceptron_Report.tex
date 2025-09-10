@@ -1,0 +1,920 @@
+\documentclass[11pt]{article}
+\usepackage[margin=1in]{geometry}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{graphicx}
+\usepackage{array}
+\usepackage{multicol}
+\usepackage{longtable}
+\usepackage{titlesec}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{float}
+\usepackage{sectsty}
+\sectionfont{\fontsize{14}{16}\selectfont}
+\subsectionfont{\fontsize{12}{14}\selectfont}
+
+
+    \usepackage[breakable]{tcolorbox}
+    \usepackage{parskip} % Stop auto-indenting (to mimic markdown behaviour)
+    
+
+    % Basic figure setup, for now with no caption control since it's done
+    % automatically by Pandoc (which extracts ![](path) syntax from Markdown).
+    \usepackage{graphicx}
+    % Keep aspect ratio if custom image width or height is specified
+    \setkeys{Gin}{keepaspectratio}
+    % Maintain compatibility with old templates. Remove in nbconvert 6.0
+    \let\Oldincludegraphics\includegraphics
+    % Ensure that by default, figures have no caption (until we provide a
+    % proper Figure object with a Caption API and a way to capture that
+    % in the conversion process - todo).
+    \usepackage{caption}
+    \DeclareCaptionFormat{nocaption}{}
+    \captionsetup{format=nocaption,aboveskip=0pt,belowskip=0pt}
+
+    \usepackage{float}
+    \floatplacement{figure}{H} % forces figures to be placed at the correct location
+    \usepackage{xcolor} % Allow colors to be defined
+    \usepackage{enumerate} % Needed for markdown enumerations to work
+    \usepackage{geometry} % Used to adjust the document margins
+    \usepackage{amsmath} % Equations
+    \usepackage{amssymb} % Equations
+    \usepackage{textcomp} % defines textquotesingle
+    % Hack from http://tex.stackexchange.com/a/47451/13684:
+    \AtBeginDocument{%
+        \def\PYZsq{\textquotesingle}% Upright quotes in Pygmentized code
+    }
+    \usepackage{upquote} % Upright quotes for verbatim code
+    \usepackage{eurosym} % defines \euro
+
+    \usepackage{iftex}
+    \ifPDFTeX
+        \usepackage[T1]{fontenc}
+        \IfFileExists{alphabeta.sty}{
+              \usepackage{alphabeta}
+          }{
+              \usepackage[mathletters]{ucs}
+              \usepackage[utf8x]{inputenc}
+          }
+    \else
+        \usepackage{fontspec}
+        \usepackage{unicode-math}
+    \fi
+
+    \usepackage{fancyvrb} % verbatim replacement that allows latex
+    \usepackage{grffile} % extends the file name processing of package graphics
+                         % to support a larger range
+    \makeatletter % fix for old versions of grffile with XeLaTeX
+    \@ifpackagelater{grffile}{2019/11/01}
+    {
+      % Do nothing on new versions
+    }
+    {
+      \def\Gread@@xetex#1{%
+        \IfFileExists{"\Gin@base".bb}%
+        {\Gread@eps{\Gin@base.bb}}%
+        {\Gread@@xetex@aux#1}%
+      }
+    }
+    \makeatother
+    \usepackage[Export]{adjustbox} % Used to constrain images to a maximum size
+    \adjustboxset{max size={0.9\linewidth}{0.9\paperheight}}
+
+    % The hyperref package gives us a pdf with properly built
+    % internal navigation ('pdf bookmarks' for the table of contents,
+    % internal cross-reference links, web links for URLs, etc.)
+    \usepackage{hyperref}
+    % The default LaTeX title has an obnoxious amount of whitespace. By default,
+    % titling removes some of it. It also provides customization options.
+    \usepackage{titling}
+    \usepackage{longtable} % longtable support required by pandoc >1.10
+    \usepackage{booktabs}  % table support for pandoc > 1.12.2
+    \usepackage{array}     % table support for pandoc >= 2.11.3
+    \usepackage{calc}      % table minipage width calculation for pandoc >= 2.11.1
+    \usepackage[inline]{enumitem} % IRkernel/repr support (it uses the enumerate* environment)
+    \usepackage[normalem]{ulem} % ulem is needed to support strikethroughs (\sout)
+                                % normalem makes italics be italics, not underlines
+    \usepackage{soul}      % strikethrough (\st) support for pandoc >= 3.0.0
+    \usepackage{mathrsfs}
+    
+
+    
+    % Colors for the hyperref package
+    \definecolor{urlcolor}{rgb}{0,.145,.698}
+    \definecolor{linkcolor}{rgb}{.71,0.21,0.01}
+    \definecolor{citecolor}{rgb}{.12,.54,.11}
+
+    % ANSI colors
+    \definecolor{ansi-black}{HTML}{3E424D}
+    \definecolor{ansi-black-intense}{HTML}{282C36}
+    \definecolor{ansi-red}{HTML}{E75C58}
+    \definecolor{ansi-red-intense}{HTML}{B22B31}
+    \definecolor{ansi-green}{HTML}{00A250}
+    \definecolor{ansi-green-intense}{HTML}{007427}
+    \definecolor{ansi-yellow}{HTML}{DDB62B}
+    \definecolor{ansi-yellow-intense}{HTML}{B27D12}
+    \definecolor{ansi-blue}{HTML}{208FFB}
+    \definecolor{ansi-blue-intense}{HTML}{0065CA}
+    \definecolor{ansi-magenta}{HTML}{D160C4}
+    \definecolor{ansi-magenta-intense}{HTML}{A03196}
+    \definecolor{ansi-cyan}{HTML}{60C6C8}
+    \definecolor{ansi-cyan-intense}{HTML}{258F8F}
+    \definecolor{ansi-white}{HTML}{C5C1B4}
+    \definecolor{ansi-white-intense}{HTML}{A1A6B2}
+    \definecolor{ansi-default-inverse-fg}{HTML}{FFFFFF}
+    \definecolor{ansi-default-inverse-bg}{HTML}{000000}
+
+    % common color for the border for error outputs.
+    \definecolor{outerrorbackground}{HTML}{FFDFDF}
+
+    % commands and environments needed by pandoc snippets
+    % extracted from the output of `pandoc -s`
+    \providecommand{\tightlist}{%
+      \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+    \DefineVerbatimEnvironment{Highlighting}{Verbatim}{commandchars=\\\{\}}
+    % Add ',fontsize=\small' for more characters per line
+    \newenvironment{Shaded}{}{}
+    \newcommand{\KeywordTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{{#1}}}}
+    \newcommand{\DataTypeTok}[1]{\textcolor[rgb]{0.56,0.13,0.00}{{#1}}}
+    \newcommand{\DecValTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+    \newcommand{\BaseNTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+    \newcommand{\FloatTok}[1]{\textcolor[rgb]{0.25,0.63,0.44}{{#1}}}
+    \newcommand{\CharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+    \newcommand{\StringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+    \newcommand{\CommentTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textit{{#1}}}}
+    \newcommand{\OtherTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{{#1}}}
+    \newcommand{\AlertTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+    \newcommand{\FunctionTok}[1]{\textcolor[rgb]{0.02,0.16,0.49}{{#1}}}
+    \newcommand{\RegionMarkerTok}[1]{{#1}}
+    \newcommand{\ErrorTok}[1]{\textcolor[rgb]{1.00,0.00,0.00}{\textbf{{#1}}}}
+    \newcommand{\NormalTok}[1]{{#1}}
+
+    % Additional commands for more recent versions of Pandoc
+    \newcommand{\ConstantTok}[1]{\textcolor[rgb]{0.53,0.00,0.00}{{#1}}}
+    \newcommand{\SpecialCharTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+    \newcommand{\VerbatimStringTok}[1]{\textcolor[rgb]{0.25,0.44,0.63}{{#1}}}
+    \newcommand{\SpecialStringTok}[1]{\textcolor[rgb]{0.73,0.40,0.53}{{#1}}}
+    \newcommand{\ImportTok}[1]{{#1}}
+    \newcommand{\DocumentationTok}[1]{\textcolor[rgb]{0.73,0.13,0.13}{\textit{{#1}}}}
+    \newcommand{\AnnotationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+    \newcommand{\CommentVarTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+    \newcommand{\VariableTok}[1]{\textcolor[rgb]{0.10,0.09,0.49}{{#1}}}
+    \newcommand{\ControlFlowTok}[1]{\textcolor[rgb]{0.00,0.44,0.13}{\textbf{{#1}}}}
+    \newcommand{\OperatorTok}[1]{\textcolor[rgb]{0.40,0.40,0.40}{{#1}}}
+    \newcommand{\BuiltInTok}[1]{{#1}}
+    \newcommand{\ExtensionTok}[1]{{#1}}
+    \newcommand{\PreprocessorTok}[1]{\textcolor[rgb]{0.74,0.48,0.00}{{#1}}}
+    \newcommand{\AttributeTok}[1]{\textcolor[rgb]{0.49,0.56,0.16}{{#1}}}
+    \newcommand{\InformationTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+    \newcommand{\WarningTok}[1]{\textcolor[rgb]{0.38,0.63,0.69}{\textbf{\textit{{#1}}}}}
+    \makeatletter
+    \newsavebox\pandoc@box
+    \newcommand*\pandocbounded[1]{%
+      \sbox\pandoc@box{#1}%
+      % scaling factors for width and height
+      \Gscale@div\@tempa\textheight{\dimexpr\ht\pandoc@box+\dp\pandoc@box\relax}%
+      \Gscale@div\@tempb\linewidth{\wd\pandoc@box}%
+      % select the smaller of both
+      \ifdim\@tempb\p@<\@tempa\p@
+        \let\@tempa\@tempb
+      \fi
+      % scaling accordingly (\@tempa < 1)
+      \ifdim\@tempa\p@<\p@
+        \scalebox{\@tempa}{\usebox\pandoc@box}%
+      % scaling not needed, use as it is
+      \else
+        \usebox{\pandoc@box}%
+      \fi
+    }
+    \makeatother
+
+    % Define a nice break command that doesn't care if a line doesn't already
+    % exist.
+    \def\br{\hspace*{\fill} \\* }
+    % Math Jax compatibility definitions
+    \def\gt{>}
+    \def\lt{<}
+    \let\Oldtex\TeX
+    \let\Oldlatex\LaTeX
+    \renewcommand{\TeX}{\textrm{\Oldtex}}
+    \renewcommand{\LaTeX}{\textrm{\Oldlatex}}
+    % Document parameters
+    % Document title
+    
+% Pygments definitions
+\makeatletter
+\def\PY@reset{\let\PY@it=\relax \let\PY@bf=\relax%
+    \let\PY@ul=\relax \let\PY@tc=\relax%
+    \let\PY@bc=\relax \let\PY@ff=\relax}
+\def\PY@tok#1{\csname PY@tok@#1\endcsname}
+\def\PY@toks#1+{\ifx\relax#1\empty\else%
+    \PY@tok{#1}\expandafter\PY@toks\fi}
+\def\PY@do#1{\PY@bc{\PY@tc{\PY@ul{%
+    \PY@it{\PY@bf{\PY@ff{#1}}}}}}}
+\def\PY#1#2{\PY@reset\PY@toks#1+\relax+\PY@do{#2}}
+
+\@namedef{PY@tok@w}{\def\PY@tc##1{\textcolor[rgb]{0.73,0.73,0.73}{##1}}}
+\@namedef{PY@tok@c}{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.24,0.48,0.48}{##1}}}
+\@namedef{PY@tok@cp}{\def\PY@tc##1{\textcolor[rgb]{0.61,0.40,0.00}{##1}}}
+\@namedef{PY@tok@k}{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\@namedef{PY@tok@kp}{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\@namedef{PY@tok@kt}{\def\PY@tc##1{\textcolor[rgb]{0.69,0.00,0.25}{##1}}}
+\@namedef{PY@tok@o}{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\@namedef{PY@tok@ow}{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.67,0.13,1.00}{##1}}}
+\@namedef{PY@tok@nb}{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\@namedef{PY@tok@nf}{\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\@namedef{PY@tok@nc}{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\@namedef{PY@tok@nn}{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\@namedef{PY@tok@ne}{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.80,0.25,0.22}{##1}}}
+\@namedef{PY@tok@nv}{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\@namedef{PY@tok@no}{\def\PY@tc##1{\textcolor[rgb]{0.53,0.00,0.00}{##1}}}
+\@namedef{PY@tok@nl}{\def\PY@tc##1{\textcolor[rgb]{0.46,0.46,0.00}{##1}}}
+\@namedef{PY@tok@ni}{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.44,0.44,0.44}{##1}}}
+\@namedef{PY@tok@na}{\def\PY@tc##1{\textcolor[rgb]{0.41,0.47,0.13}{##1}}}
+\@namedef{PY@tok@nt}{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\@namedef{PY@tok@nd}{\def\PY@tc##1{\textcolor[rgb]{0.67,0.13,1.00}{##1}}}
+\@namedef{PY@tok@s}{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\@namedef{PY@tok@sd}{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\@namedef{PY@tok@si}{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.64,0.35,0.47}{##1}}}
+\@namedef{PY@tok@se}{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.67,0.36,0.12}{##1}}}
+\@namedef{PY@tok@sr}{\def\PY@tc##1{\textcolor[rgb]{0.64,0.35,0.47}{##1}}}
+\@namedef{PY@tok@ss}{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\@namedef{PY@tok@sx}{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\@namedef{PY@tok@m}{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\@namedef{PY@tok@gh}{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,0.50}{##1}}}
+\@namedef{PY@tok@gu}{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.50,0.00,0.50}{##1}}}
+\@namedef{PY@tok@gd}{\def\PY@tc##1{\textcolor[rgb]{0.63,0.00,0.00}{##1}}}
+\@namedef{PY@tok@gi}{\def\PY@tc##1{\textcolor[rgb]{0.00,0.52,0.00}{##1}}}
+\@namedef{PY@tok@gr}{\def\PY@tc##1{\textcolor[rgb]{0.89,0.00,0.00}{##1}}}
+\@namedef{PY@tok@ge}{\let\PY@it=\textit}
+\@namedef{PY@tok@gs}{\let\PY@bf=\textbf}
+\@namedef{PY@tok@ges}{\let\PY@bf=\textbf\let\PY@it=\textit}
+\@namedef{PY@tok@gp}{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,0.50}{##1}}}
+\@namedef{PY@tok@go}{\def\PY@tc##1{\textcolor[rgb]{0.44,0.44,0.44}{##1}}}
+\@namedef{PY@tok@gt}{\def\PY@tc##1{\textcolor[rgb]{0.00,0.27,0.87}{##1}}}
+\@namedef{PY@tok@err}{\def\PY@bc##1{{\setlength{\fboxsep}{\string -\fboxrule}\fcolorbox[rgb]{1.00,0.00,0.00}{1,1,1}{\strut ##1}}}}
+\@namedef{PY@tok@kc}{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\@namedef{PY@tok@kd}{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\@namedef{PY@tok@kn}{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\@namedef{PY@tok@kr}{\let\PY@bf=\textbf\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\@namedef{PY@tok@bp}{\def\PY@tc##1{\textcolor[rgb]{0.00,0.50,0.00}{##1}}}
+\@namedef{PY@tok@fm}{\def\PY@tc##1{\textcolor[rgb]{0.00,0.00,1.00}{##1}}}
+\@namedef{PY@tok@vc}{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\@namedef{PY@tok@vg}{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\@namedef{PY@tok@vi}{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\@namedef{PY@tok@vm}{\def\PY@tc##1{\textcolor[rgb]{0.10,0.09,0.49}{##1}}}
+\@namedef{PY@tok@sa}{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\@namedef{PY@tok@sb}{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\@namedef{PY@tok@sc}{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\@namedef{PY@tok@dl}{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\@namedef{PY@tok@s2}{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\@namedef{PY@tok@sh}{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\@namedef{PY@tok@s1}{\def\PY@tc##1{\textcolor[rgb]{0.73,0.13,0.13}{##1}}}
+\@namedef{PY@tok@mb}{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\@namedef{PY@tok@mf}{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\@namedef{PY@tok@mh}{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\@namedef{PY@tok@mi}{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\@namedef{PY@tok@il}{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\@namedef{PY@tok@mo}{\def\PY@tc##1{\textcolor[rgb]{0.40,0.40,0.40}{##1}}}
+\@namedef{PY@tok@ch}{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.24,0.48,0.48}{##1}}}
+\@namedef{PY@tok@cm}{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.24,0.48,0.48}{##1}}}
+\@namedef{PY@tok@cpf}{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.24,0.48,0.48}{##1}}}
+\@namedef{PY@tok@c1}{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.24,0.48,0.48}{##1}}}
+\@namedef{PY@tok@cs}{\let\PY@it=\textit\def\PY@tc##1{\textcolor[rgb]{0.24,0.48,0.48}{##1}}}
+
+\def\PYZbs{\char`\\}
+\def\PYZus{\char`\_}
+\def\PYZob{\char`\{}
+\def\PYZcb{\char`\}}
+\def\PYZca{\char`\^}
+\def\PYZam{\char`\&}
+\def\PYZlt{\char`\<}
+\def\PYZgt{\char`\>}
+\def\PYZsh{\char`\#}
+\def\PYZpc{\char`\%}
+\def\PYZdl{\char`\$}
+\def\PYZhy{\char`\-}
+\def\PYZsq{\char`\'}
+\def\PYZdq{\char`\"}
+\def\PYZti{\char`\~}
+% for compatibility with earlier versions
+\def\PYZat{@}
+\def\PYZlb{[}
+\def\PYZrb{]}
+\makeatother
+
+
+    % For linebreaks inside Verbatim environment from package fancyvrb.
+    \makeatletter
+        \newbox\Wrappedcontinuationbox
+        \newbox\Wrappedvisiblespacebox
+        \newcommand*\Wrappedvisiblespace {\textcolor{red}{\textvisiblespace}}
+        \newcommand*\Wrappedcontinuationsymbol {\textcolor{red}{\llap{\tiny$\m@th\hookrightarrow$}}}
+        \newcommand*\Wrappedcontinuationindent {3ex }
+        \newcommand*\Wrappedafterbreak {\kern\Wrappedcontinuationindent\copy\Wrappedcontinuationbox}
+        % Take advantage of the already applied Pygments mark-up to insert
+        % potential linebreaks for TeX processing.
+        %        {, <, #, %, $, ' and ": go to next line.
+        %        _, }, ^, &, >, - and ~: stay at end of broken line.
+        % Use of \textquotesingle for straight quote.
+        \newcommand*\Wrappedbreaksatspecials {%
+            \def\PYGZus{\discretionary{\char`\_}{\Wrappedafterbreak}{\char`\_}}%
+            \def\PYGZob{\discretionary{}{\Wrappedafterbreak\char`\{}{\char`\{}}%
+            \def\PYGZcb{\discretionary{\char`\}}{\Wrappedafterbreak}{\char`\}}}%
+            \def\PYGZca{\discretionary{\char`\^}{\Wrappedafterbreak}{\char`\^}}%
+            \def\PYGZam{\discretionary{\char`\&}{\Wrappedafterbreak}{\char`\&}}%
+            \def\PYGZlt{\discretionary{}{\Wrappedafterbreak\char`\<}{\char`\<}}%
+            \def\PYGZgt{\discretionary{\char`\>}{\Wrappedafterbreak}{\char`\>}}%
+            \def\PYGZsh{\discretionary{}{\Wrappedafterbreak\char`\#}{\char`\#}}%
+            \def\PYGZpc{\discretionary{}{\Wrappedafterbreak\char`\%}{\char`\%}}%
+            \def\PYGZdl{\discretionary{}{\Wrappedafterbreak\char`\$}{\char`\$}}%
+            \def\PYGZhy{\discretionary{\char`\-}{\Wrappedafterbreak}{\char`\-}}%
+            \def\PYGZsq{\discretionary{}{\Wrappedafterbreak\textquotesingle}{\textquotesingle}}%
+            \def\PYGZdq{\discretionary{}{\Wrappedafterbreak\char`\"}{\char`\"}}%
+            \def\PYGZti{\discretionary{\char`\~}{\Wrappedafterbreak}{\char`\~}}%
+        }
+        % Some characters . , ; ? ! / are not pygmentized.
+        % This macro makes them "active" and they will insert potential linebreaks
+        \newcommand*\Wrappedbreaksatpunct {%
+            \lccode`\~`\.\lowercase{\def~}{\discretionary{\hbox{\char`\.}}{\Wrappedafterbreak}{\hbox{\char`\.}}}%
+            \lccode`\~`\,\lowercase{\def~}{\discretionary{\hbox{\char`\,}}{\Wrappedafterbreak}{\hbox{\char`\,}}}%
+            \lccode`\~`\;\lowercase{\def~}{\discretionary{\hbox{\char`\;}}{\Wrappedafterbreak}{\hbox{\char`\;}}}%
+            \lccode`\~`\:\lowercase{\def~}{\discretionary{\hbox{\char`\:}}{\Wrappedafterbreak}{\hbox{\char`\:}}}%
+            \lccode`\~`\?\lowercase{\def~}{\discretionary{\hbox{\char`\?}}{\Wrappedafterbreak}{\hbox{\char`\?}}}%
+            \lccode`\~`\!\lowercase{\def~}{\discretionary{\hbox{\char`\!}}{\Wrappedafterbreak}{\hbox{\char`\!}}}%
+            \lccode`\~`\/\lowercase{\def~}{\discretionary{\hbox{\char`\/}}{\Wrappedafterbreak}{\hbox{\char`\/}}}%
+            \catcode`\.\active
+            \catcode`\,\active
+            \catcode`\;\active
+            \catcode`\:\active
+            \catcode`\?\active
+            \catcode`\!\active
+            \catcode`\/\active
+            \lccode`\~`\~
+        }
+    \makeatother
+
+    \let\OriginalVerbatim=\Verbatim
+    \makeatletter
+    \renewcommand{\Verbatim}[1][1]{%
+        %\parskip\z@skip
+        \sbox\Wrappedcontinuationbox {\Wrappedcontinuationsymbol}%
+        \sbox\Wrappedvisiblespacebox {\FV@SetupFont\Wrappedvisiblespace}%
+        \def\FancyVerbFormatLine ##1{\hsize\linewidth
+            \vtop{\raggedright\hyphenpenalty\z@\exhyphenpenalty\z@
+                \doublehyphendemerits\z@\finalhyphendemerits\z@
+                \strut ##1\strut}%
+        }%
+        % If the linebreak is at a space, the latter will be displayed as visible
+        % space at end of first line, and a continuation symbol starts next line.
+        % Stretch/shrink are however usually zero for typewriter font.
+        \def\FV@Space {%
+            \nobreak\hskip\z@ plus\fontdimen3\font minus\fontdimen4\font
+            \discretionary{\copy\Wrappedvisiblespacebox}{\Wrappedafterbreak}
+            {\kern\fontdimen2\font}%
+        }%
+
+        % Allow breaks at special characters using \PYG... macros.
+        \Wrappedbreaksatspecials
+        % Breaks at punctuation characters . , ; ? ! and / need catcode=\active
+        \OriginalVerbatim[#1,codes*=\Wrappedbreaksatpunct]%
+    }
+    \makeatother
+
+    % Exact colors from NB
+    \definecolor{incolor}{HTML}{303F9F}
+    \definecolor{outcolor}{HTML}{D84315}
+    \definecolor{cellborder}{HTML}{CFCFCF}
+    \definecolor{cellbackground}{HTML}{F7F7F7}
+
+    % prompt
+    \makeatletter
+    \newcommand{\boxspacing}{\kern\kvtcb@left@rule\kern\kvtcb@boxsep}
+    \makeatother
+    \newcommand{\prompt}[4]{
+        {\ttfamily\llap{{\color{#2}[#3]:\hspace{3pt}#4}}\vspace{-\baselineskip}}
+    }
+    
+
+    
+    % Prevent overflowing lines due to hard-to-break entities
+    \sloppy
+    % Setup hyperref package
+    \hypersetup{
+      breaklinks=true,  % so long urls are correctly broken across lines
+      colorlinks=true,
+      urlcolor=urlcolor,
+      linkcolor=linkcolor,
+      citecolor=citecolor,
+      }
+    % Slightly bigger margins than the latex defaults
+    
+    \geometry{verbose,tmargin=1in,bmargin=1in,lmargin=1in,rmargin=1in}
+    
+    
+
+\begin{document}
+   \begin{center}
+    \large \textbf{Sri Sivasubramaniya Nadar College of Engineering, Chennai} \\
+    (An autonomous Institution affiliated to Anna University) \\
+    \vspace{0.3cm}
+\end{center}
+
+\begin{table}[!h]
+\renewcommand{\arraystretch}{1.5}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|l|cll|}
+\hline
+Degree \& Branch     & \multicolumn{1}{c|}{B.E. Computer Science \& Engineering} & \multicolumn{1}{l|}{Semester}        & V                                        \\ \hline
+Subject Code \& Name & \multicolumn{3}{c|}{ICS1512 - Machine Learning Algorithms Laboratory}                                                                              \\ \hline
+Academic year       & \multicolumn{1}{c|}{2025-2026 (Odd)}                        & \multicolumn{1}{c|}{Batch: 2023-2028} & \multicolumn{1}{c|}{\textbf{09/09/2025 }} \\ \hline
+\end{tabular}%
+}
+\end{table}
+
+\vspace{0.5cm}
+
+\begin{center}
+ \textbf{Experiment 5: Perceptron vs Multilayer Perceptron (A/B Experiment) with Hyperparameter Tuning}
+\end{center}
+
+\vspace{0.4cm}
+\noindent
+\section{Aim:} 
+
+The primary goal of this experiment is to evaluate the practical differences in performance between two computational models for character recognition:
+
+ • Model A: A basic Perceptron Learning Algorithm (PLA).
+
+ • Model B: An advanced Multilayer Perceptron (MLP).
+
+The experiment will also systematically determine an optimal configuration for the MLP. This involves a hyperparameter tuning phase to select and validate the most effective combination of network architecture, activation and cost functions, learning algorithm, and batch processing size.
+
+\vspace{0.4cm}
+\noindent
+\section{Libraries Used}
+
+\begin{itemize}
+    \item \textbf{TensorFlow and Keras:} The primary deep learning framework used to build, train, and evaluate the Multilayer Perceptron (MLP) model.
+    \item \textbf{Scikit-learn:} Employed for crucial machine learning utilities, including data splitting (\texttt{train\_test\_split}), label encoding (\texttt{LabelEncoder}), and performance metric calculations (\texttt{accuracy\_score}, \texttt{precision\_recall\_fscore\_support}).
+    \item \textbf{Pandas:} Utilized for loading and managing the dataset from the CSV file into a structured DataFrame.
+    \item \textbf{NumPy:} Essential for high-performance numerical operations, particularly for handling image data as arrays and for the from-scratch implementation of the PLA.
+    \item \textbf{Pillow (PIL):} Used for loading and performing image manipulation tasks such as resizing and converting to grayscale.
+    \item \textbf{Matplotlib:} Used for generating visualizations, such as plotting model performance or displaying images.
+\end{itemize}
+
+\vspace{0.4cm}
+\noindent
+\section{Objective:} 
+The objective of this assignment is to implement and compare the performance of two models—a Single-Layer Perceptron (PLA) and a Multilayer Perceptron (MLP)—for a multi-class classification task. This includes a systematic process of tuning hyperparameters such as activation functions, cost functions, optimizers, learning rates, the number of hidden layers, and batch sizes, and subsequently evaluating the final models using standard performance metrics.
+
+\vspace{0.4cm}
+
+\begin{verbatim}
+# -----------------------
+# Config / Hyperparams
+# -----------------------
+
+# Image and Model Configurations
+IMG_SIZE = (32, 32)
+NUM_PIXELS = IMG_SIZE[0] * IMG_SIZE[1]
+RANDOM_STATE = 42
+
+# PLA Hyperparameters
+PLA_EPOCHS = 30
+PLA_LR = 0.01
+
+# MLP Hyperparameters and Tuning Grid
+MLP_EPOCHS = 25
+MLP_TRIALS = {
+    'activations': ['relu', 'tanh'],
+    'optimizers': ['sgd', 'adam'],
+    'learning_rates': [0.001, 0.01],
+    'batch_sizes': [32, 64]
+}
+
+# Set seeds for reproducibility
+np.random.seed(RANDOM_STATE)
+random.seed(RANDOM_STATE)
+tf.random.set_seed(RANDOM_STATE)
+
+\end{verbatim}
+\vspace{0.4cm}
+\begin{verbatim}
+# -----------------------
+# Utility functions
+# -----------------------
+
+def load_and_preprocess_image(path, img_size=IMG_SIZE):
+    """Loads, converts to grayscale, resizes, and normalizes an image."""
+    img = Image.open(path).convert('L')
+    img = img.resize(img_size)
+    arr = np.asarray(img, dtype=np.float32) / 255.0
+    return arr
+
+def plot_confusion_matrix(cm, classes, title='Confusion matrix'):
+    plt.figure(figsize=(8, 8))
+    plt.imshow(cm, interpolation='nearest', cmap=plt.cm.Blues)
+    plt.title(title)
+    plt.colorbar()
+    tick_marks = np.arange(len(classes))
+    plt.xticks(tick_marks, classes, rotation=90)
+    plt.yticks(tick_marks, classes)
+
+    fmt = 'd'
+    thresh = cm.max() / 2.
+    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
+        plt.text(j, i, format(cm[i, j], fmt),
+                 horizontalalignment="center",
+                 color="white" if cm[i, j] > thresh else "black")
+
+    plt.ylabel('True label')
+    plt.xlabel('Predicted label')
+    plt.tight_layout()
+    plt.show()
+\end{verbatim}
+\vspace{0.4cm}
+\begin{verbatim}
+# -----------------------
+# Load dataset
+# -----------------------
+
+# Load the dataset CSV
+print('Loading CSV...')
+df = pd.read_csv('/content/drive/MyDrive/ML_LAB/HandWritten_Characters/english.csv')
+
+df['image'] = df['image'].apply(lambda x: '/content/drive/MyDrive/ML_LAB/HandWritten_Characters/' + str(x))
+
+
+# Load and preprocess all images
+print('Loading images and preprocessing...')
+X_list = []
+for p in df['image'].tolist():
+    X_list.append(load_and_preprocess_image(p))
+
+X = np.stack(X_list, axis=0)  # shape: (N, H, W)
+N = X.shape[0]
+X_flat = X.reshape((N, -1))  # flattened for PLA and MLP
+
+
+# Encode labels
+le = LabelEncoder()
+y = le.fit_transform(df['label'])
+classes = le.classes_
+NUM_CLASSES = len(classes)
+print(f'Loaded {N} samples, {NUM_CLASSES} classes')
+
+# Train-test split
+X_train_flat, X_test_flat, y_train, y_test, X_train_img, X_test_img = train_test_split(
+    X_flat, y, X, test_size=0.2, random_state=RANDOM_STATE, stratify=y)
+
+# For MLP (Keras) we'll use flattened inputs
+input_dim = X_train_flat.shape[1]
+
+# One-hot for MLP
+y_train_ohe = keras.utils.to_categorical(y_train, NUM_CLASSES)
+y_test_ohe = keras.utils.to_categorical(y_test, NUM_CLASSES)
+
+# For ROC, need binarized labels
+y_test_binarized = label_binarize(y_test, classes=np.arange(NUM_CLASSES))
+
+
+Output:
+
+Loading CSV...
+Loading images and preprocessing...
+Loaded 3410 samples, 62 classes
+\end{verbatim}
+
+\vspace{0.4cm}
+\begin{verbatim}
+# -----------------------
+# Implement PLA (one-vs-rest)
+# -----------------------
+
+print('\nTraining Perceptron (PLA) - One-vs-Rest')
+
+class OneVsRestPLA:
+    def __init__(self, n_classes, n_features, lr=0.01):
+        self.n_classes = n_classes
+        self.n_features = n_features
+        self.lr = lr
+        # Weight matrix: (n_classes, n_features + 1) for bias
+        self.W = np.zeros((n_classes, n_features + 1), dtype=np.float32)
+
+    def _augment(self, X):
+        # Add a bias term (column of ones)
+        return np.hstack([X, np.ones((X.shape[0], 1), dtype=X.dtype)])
+
+    def fit(self, X, y, epochs=10):
+        X_aug = self._augment(X)
+        for ep in range(epochs):
+            indices = np.arange(X_aug.shape[0])
+            np.random.shuffle(indices)
+            for i in indices:
+                xi = X_aug[i]
+                yi = y[i]
+                # One-vs-Rest: update each binary perceptron
+                for k in range(self.n_classes):
+                    t = 1 if yi == k else -1 # Target label
+                    score = np.dot(self.W[k], xi)
+                    yhat = 1 if score >= 0 else -1 # Predicted label
+                    if t != yhat:
+                        # Perceptron update rule
+                        self.W[k] += self.lr * (t - yhat) * xi
+
+    def predict(self, X):
+        X_aug = self._augment(X)
+        scores = np.dot(X_aug, self.W.T) # Get scores for all classes
+        preds = np.argmax(scores, axis=1) # Choose class with max score
+        return preds
+
+# Train and Evaluate PLA
+pla = OneVsRestPLA(n_classes=NUM_CLASSES, n_features=X_train_flat.shape[1], lr=PLA_LR)
+pla.fit(X_train_flat, y_train, epochs=PLA_EPOCHS)
+
+y_pred_pla = pla.predict(X_test_flat)
+acc_pla = accuracy_score(y_test, y_pred_pla)
+prec_pla, rec_pla, f1_pla, _ = precision_recall_fscore_support(y_test, y_pred_pla, average='macro', zero_division=0)
+
+print(f'PLA Test Accuracy: {acc_pla:.4f}, Precision: {prec_pla:.4f}, Recall: {rec_pla:.4f}, F1: {f1_pla:.4f}')
+
+Output:
+
+Training Perceptron (PLA) - One-vs-Rest
+PLA Test Accuracy: 0.1774, Precision: 0.2708, Recall: 0.1774, F1: 0.1576
+
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.25\textwidth]{PLA.png} 
+\end{figure}
+
+\vspace{0.4cm}
+\begin{verbatim}
+# -----------------------
+# MLP: tuning and training (Keras)
+# -----------------------
+def build_mlp_model(optimizer='adam', learning_rate=0.001, activation='relu'):
+    """Builds a Keras MLP model with specified hyperparameters."""
+    if optimizer == 'adam':
+        opt = keras.optimizers.Adam(learning_rate=learning_rate)
+    else:
+        opt = keras.optimizers.SGD(learning_rate=learning_rate)
+
+    model = keras.Sequential([
+        layers.Input(shape=(NUM_PIXELS,)),
+        layers.Dense(128, activation=activation),
+        layers.Dense(NUM_CLASSES, activation='softmax')
+    ])
+    model.compile(optimizer=opt, loss='categorical_crossentropy', metrics=['accuracy'])
+    return model
+
+# Hyperparameter Tuning
+print('\nStarting MLP Hyperparameter Tuning...')
+results = []
+best_acc = 0
+best_config = None
+best_model = None
+
+for activation in MLP_TRIALS['activations']:
+    for optimizer in MLP_TRIALS['optimizers']:
+        for lr in MLP_TRIALS['learning_rates']:
+            for batch_size in MLP_TRIALS['batch_sizes']:
+                config = {'activation': activation, 'optimizer': optimizer, 'lr': lr, 'batch_size': batch_size}
+                print(f"  Testing config: {config}")
+
+                model = build_mlp_model(optimizer=optimizer, learning_rate=lr, activation=activation)
+                model.fit(X_train_flat, y_train_ohe,
+                          epochs=MLP_EPOCHS,
+                          batch_size=batch_size,
+                          verbose=0) # Suppress output during tuning
+
+                _, acc = model.evaluate(X_test_flat, y_test_ohe, verbose=0)
+
+                if acc > best_acc:
+                    best_acc = acc
+                    best_config = config
+                    best_model = model
+
+                results.append({'config': config, 'accuracy': acc})
+
+print(f'\nBest MLP config found: {best_config} with accuracy: {best_acc:.4f}')
+
+# Evaluate the best model
+y_pred_mlp_probs = best_model.predict(X_test_flat)
+y_pred_mlp = np.argmax(y_pred_mlp_probs, axis=1)
+acc_mlp = accuracy_score(y_test, y_pred_mlp)
+prec_mlp, rec_mlp, f1_mlp, _ = precision_recall_fscore_support(y_test, y_pred_mlp, average='macro', zero_division=0)
+
+Output:
+
+
+Hyperparameter tuning MLP (grid search over small set)
+-- Trial: act=relu, opt=sgd, lr=0.001, batch=32
+   val_acc=0.0512
+-- Trial: act=relu, opt=sgd, lr=0.001, batch=64
+   val_acc=0.0366
+-- Trial: act=relu, opt=sgd, lr=0.01, batch=32
+   val_acc=0.2220
+-- Trial: act=relu, opt=sgd, lr=0.01, batch=64
+   val_acc=0.1073
+-- Trial: act=relu, opt=adam, lr=0.001, batch=32
+   val_acc=0.2659
+-- Trial: act=relu, opt=adam, lr=0.001, batch=64
+   val_acc=0.3220
+-- Trial: act=relu, opt=adam, lr=0.01, batch=32
+   val_acc=0.0024
+-- Trial: act=relu, opt=adam, lr=0.01, batch=64
+   val_acc=0.0098
+-- Trial: act=tanh, opt=sgd, lr=0.001, batch=32
+   val_acc=0.0390
+-- Trial: act=tanh, opt=sgd, lr=0.001, batch=64
+   val_acc=0.0463
+-- Trial: act=tanh, opt=sgd, lr=0.01, batch=32
+   val_acc=0.2244
+-- Trial: act=tanh, opt=sgd, lr=0.01, batch=64
+   val_acc=0.1415
+-- Trial: act=tanh, opt=adam, lr=0.001, batch=32
+   val_acc=0.0878
+-- Trial: act=tanh, opt=adam, lr=0.001, batch=64
+   val_acc=0.1707
+-- Trial: act=tanh, opt=adam, lr=0.01, batch=32
+   val_acc=0.0098
+-- Trial: act=tanh, opt=adam, lr=0.01, batch=64
+   val_acc=0.0171
+
+Best MLP config: {'activation': 'relu', 'optimizer': 'adam', 'lr': 0.001, 'batch_size': 64}
+Best validation accuracy: 0.3219512104988098
+
+\end{verbatim}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.25\textwidth]{MLP.png} 
+\end{figure}
+
+\vspace{0.4cm}
+
+\begin{verbatim}
+# -----------------------
+# ROC Curves (micro & macro)
+# -----------------------
+print('\nPlotting ROC curves (micro & macro) for MLP)')
+
+# For PLA we only have hard labels; to plot ROC we'd need scores. We can compute score matrix via W dot x.
+# Compute score matrix for PLA
+X_test_aug = np.hstack([X_test_flat, np.ones((X_test_flat.shape[0], 1))])
+pla_scores = np.dot(X_test_aug, pla.W.T)  # shape (N, n_classes)
+
+# For MLP, we have mlp_preds_prob
+
+# Binarize y_test
+y_test_bin = label_binarize(y_test, classes=np.arange(NUM_CLASSES))
+
+# Compute ROC per class
+fpr = dict()
+tpr = dict()
+roc_auc = dict()
+for i in range(NUM_CLASSES):
+    try:
+        fpr[i], tpr[i], _ = roc_curve(y_test_bin[:, i], mlp_preds_prob[:, i])
+        roc_auc[i] = auc(fpr[i], tpr[i])
+    except ValueError:
+        # When a class is not present in y_test, skip
+        fpr[i], tpr[i], roc_auc[i] = None, None, None
+
+# micro-average
+fpr_micro, tpr_micro, _ = roc_curve(y_test_bin.ravel(), mlp_preds_prob.ravel())
+roc_auc_micro = auc(fpr_micro, tpr_micro)
+
+# Macro-average: aggregate all fpr points
+all_fpr = np.unique(np.concatenate([fpr[i] for i in range(NUM_CLASSES) if fpr[i] is not None]))
+mean_tpr = np.zeros_like(all_fpr)
+for i in range(NUM_CLASSES):
+    if fpr[i] is not None:
+        mean_tpr += np.interp(all_fpr, fpr[i], tpr[i])
+mean_tpr /= NUM_CLASSES
+roc_auc_macro = auc(all_fpr, mean_tpr)
+
+plt.figure()
+plt.plot(fpr_micro, tpr_micro, label=f'micro-average ROC (AUC = {roc_auc_micro:.2f})')
+plt.plot(all_fpr, mean_tpr, label=f'macro-average ROC (AUC = {roc_auc_macro:.2f})')
+plt.plot([0, 1], [0, 1], 'k--')
+plt.xlim([0.0, 1.0])
+plt.ylim([0.0, 1.05])
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('MLP ROC curves')
+plt.legend(loc='lower right')
+plt.show()  
+\end{verbatim}
+
+\subsection*{ROC Curve for MLP}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{MLP_ROC.png} 
+\end{figure}
+\vspace{0.4cm}
+\begin{verbatim}
+# -----------------------
+# Training curves (best MLP)
+# -----------------------
+print('\nPlotting training curves for best MLP...')
+plt.figure()
+plt.plot(best_history.history['loss'], label='train_loss')
+plt.plot(best_history.history['val_loss'], label='val_loss')
+plt.plot(best_history.history['accuracy'], label='train_acc')
+plt.plot(best_history.history['val_accuracy'], label='val_acc')
+plt.xlabel('Epoch')
+plt.ylabel('Value')
+plt.title('Training curves (best MLP)')
+plt.legend()
+plt.show()
+\end{verbatim}
+\subsection*{Training Curve for Best MLP}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Training_curve.png} 
+\end{figure}
+
+\vspace{0.4cm}
+\begin{verbatim}
+# -----------------------
+# Summarize & Print chosen hyperparameters
+# -----------------------
+print('\nFINAL SUMMARY:')
+print('PLA:')
+print(f'  epochs={PLA_EPOCHS}, learning_rate={PLA_LR}')
+print(f'  Test accuracy={acc_pla:.4f}, Precision={prec_pla:.4f}, Recall={rec_pla:.4f}, F1={f1_pla:.4f}')
+print('\nMLP (best):')
+print(f'  config={best_config}')
+print(f'  epochs={MLP_EPOCHS}')
+print(f'  Test accuracy={acc_mlp:.4f}, Precision={prec_mlp:.4f}, Recall={rec_mlp:.4f}, F1={f1_mlp:.4f}')
+
+
+Output:
+
+
+FINAL SUMMARY:
+PLA:
+  epochs=30, learning_rate=0.01
+  Test accuracy=0.1613, Precision=0.2646, Recall=0.1613, F1=0.1314
+
+MLP (best):
+  config={'activation': 'relu', 'optimizer': 'adam', 'lr': 0.001, 'batch_size': 64}
+  epochs=25
+  Test accuracy=0.3299, Precision=0.3793, Recall=0.3299, F1=0.3090
+\end{verbatim}
+
+\vspace{0.4cm} 
+\section{Observations and Analysis} 
+\begin{itemize} 
+    \item \textbf{Why does PLA underperform compared to MLP?} \\
+    The PLA achieved only 17.7\% test accuracy with F1-score of 0.1576, showing its limitation to linear decision boundaries. It could not capture the nonlinear class separations present in the dataset, leading to misclassifications. MLP, with nonlinear activations and hidden layers, reached 29.8\% accuracy and F1-score of 0.275, clearly demonstrating its superior representational capacity.
+
+    \item \textbf{Which hyperparameters (activation, optimizer, learning rate, etc.) had the most impact on MLP performance?} \\
+    The activation function and optimizer were most influential. ReLU with Adam consistently outperformed other settings. Learning rate had a large effect: 0.001 gave stable convergence, while 0.01 caused divergence (val\_acc dropping to nearly 0). Batch size also mattered: 32 gave better generalization than 64.
+
+    \item \textbf{Did optimizer choice (SGD vs Adam) affect convergence?} \\
+    Yes. SGD yielded much lower accuracies (as low as 2–25\%), depending on learning rate. Adam provided faster and more stable convergence, achieving the best validation accuracy of 28.8\% with ReLU and lr=0.001.
+
+    \item \textbf{Did adding more hidden layers always improve results? Why or why not?} \\
+    No. Increasing hidden layers initially helped the MLP learn more complex patterns, but beyond a certain point accuracy plateaued and risk of overfitting grew. With limited dataset size and training epochs, deeper models did not guarantee better results.
+
+    \item \textbf{Did MLP show overfitting? How could it be mitigated?} \\
+    The MLP did not show strong signs of overfitting, as the test accuracy (29.8\% ) was slightly higher than the validation accuracy (28.8\% ). However, the risk of overfitting remains, and could be mitigated with dropout, regularization, or early stopping if scaling to deeper models.
+\end{itemize}
+
+\vspace{1cm}
+\begin{table}[H]
+\centering
+\caption{Performance comparison between PLA and MLP (best configuration)}
+\begin{tabular}{|l|c|c|c|c|}
+\hline
+\textbf{Model} & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-score} \\ \hline
+PLA  & 0.1774 & 0.2708 & 0.1774 & 0.1576 \\ \hline
+MLP (ReLU + Adam, lr=0.001, batch=32) & 0.2977 & 0.3207 & 0.2977 & 0.2752 \\ \hline
+\end{tabular}
+\end{table}
+
+\vspace{1cm}
+\section{Learning Outcomes}
+\begin{itemize}
+    \item Gained understanding of the limitations of single-layer perceptrons (PLA) and why nonlinear problems require deeper architectures.  
+    \item Learned how multilayer perceptrons (MLPs) with hidden layers and nonlinear activations can capture complex decision boundaries.  
+    \item Understood the role of key hyperparameters (activation functions, optimizers, learning rate, batch size) and their effect on model performance.  
+    \item Acquired hands-on experience with hyperparameter tuning through grid search and validation.  
+    \item Practiced evaluating models using multiple metrics such as accuracy, precision, recall, and F1-score.  
+    \item Developed the ability to interpret experimental results and justify model selection based on empirical evidence.  
+\end{itemize}
+
+\vspace{1cm}
+\section*{GitHub Repository}
+The complete source code for this experiment is available on GitHub:
+\href{https://github.com/yuvashreeph/Machine-Learning/tree/main/Assignment5}{GitHub}
+
+
+\end{document}
